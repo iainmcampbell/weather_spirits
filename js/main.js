@@ -2,15 +2,6 @@
 // (function(window){
 
 
-	var api = {
-
-		init : function(){
-			console.log('weather api')
-		}
-
-	}
-
-
 
 
 
