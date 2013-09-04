@@ -3,9 +3,21 @@
 
 include('key.php');
 
+date_default_timezone_set('UTC');
+
 /*
+
+	Weatherunderground API
+	
+	free account:
 	Calls per minute: 10
 	Max daily requests: 500
+
+	URL Format
+	http://www.wunderground.com/weather/api/d/docs?d=data/index
+
+	
+
 */
 
 $locations = array(
@@ -19,22 +31,15 @@ $locations = array(
 $today = date("Ymd");
 $refresh = false;
 
-$max_requests = 50;
+const calls_per_minute = 10;
+const max_daily_requests = 400; // 500
+
+$max_iterations = max_daily_requests / calls_per_minute; // * 10
 $current_requests = 0;
 
-// $timestamp = date('U');
+while($current_requests < max_daily_requests) {
 
-while($current_requests < $max_requests) {
-
-
-	// // has it been 60 seconds?
-	// $temp_timestamp = date('U');
-
-	// while($temp_timestamp < $timestamp+70) {
-	// 	sleep(10);
-	// 	$temp_timestamp = date('U');
-	// }
-
+	sleep(60);
 
 	// should we try to fetch new data?
 	$cached = json_decode(file_get_contents("weather.json"),true);
@@ -94,8 +99,8 @@ while($current_requests < $max_requests) {
 		$current_requests += 10;
 
 		// $timestamp = date('U');
-		
-		echo 'updated ('.$current_requests.' requests)';
+
+		echo 'updated ('.$current_requests.' requests)'.PHP_EOL;
 	}
 
 	// SERVE CACHED ********************************************************
