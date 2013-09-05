@@ -1,4 +1,14 @@
 <?php
+
+
+/*
+	
+	Weather Updater
+
+	updates the running JSON file with the latest data for each of our ten cities.
+	Runs once per day, preferably server side.
+
+*/
 	
 
 include('key.php');
@@ -16,7 +26,7 @@ date_default_timezone_set('UTC');
 	URL Format
 	http://www.wunderground.com/weather/api/d/docs?d=data/index
 
-	
+
 
 */
 
@@ -42,6 +52,7 @@ while($current_requests < max_daily_requests) {
 	sleep(60);
 
 	// should we try to fetch new data?
+	$cached = null;
 	$cached = json_decode(file_get_contents("weather.json"),true);
 
 	if($cached["sanfran"][0]['date'] != $today) {
@@ -49,8 +60,6 @@ while($current_requests < max_daily_requests) {
 	} else {
 		$refresh = false;
 	}
-
-	// $refresh = true;
 
 
 	// REFRESH ********************************************************
