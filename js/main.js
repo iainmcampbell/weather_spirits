@@ -63,9 +63,13 @@
 		data : {},
 
 		init : function(){
+			console.log('api.init() -> api.data:')
 			// load the data
 
-
+			$.getJSON('api/data.json', function(json) {
+				api.data = json;
+				console.log(api.data)
+			});
 
 		}
 
@@ -220,7 +224,7 @@
 
 	$(document).ready(function(){
 
-		// api.init();
+		api.init();
 		// // preloader.init(); // if we write a preloader
 
 

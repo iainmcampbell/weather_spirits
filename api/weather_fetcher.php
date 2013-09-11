@@ -70,7 +70,7 @@ $today = date("Ymd");
 $refresh = false;
 
 const calls_per_minute = 10;
-const max_daily_requests = 200; // 500
+const max_daily_requests = 300; // 500
 
 $max_iterations = max_daily_requests / calls_per_minute; // * 10
 $current_requests = 0;
@@ -78,14 +78,14 @@ $current_requests = 0;
 $fields = array('rain', 'snow', 'fog', 'thunder', 'tornado', 'hail', 'snowfallm', 'meantempm', 'meanwindspdm', 'precipm', 'meanvism');
 
 
-$cached = json_decode(file_get_contents("telaviv.json"),true);
+$cached = json_decode(file_get_contents("london.json"),true);
 
 while($current_requests < max_daily_requests) {
 
 	// get last date
 
-	$length = count($cached["telaviv"]);
-	$date = $cached["telaviv"][$length-1]["date"];
+	$length = count($cached["london"]);
+	$date = $cached["london"][$length-1]["date"];
 
 	if($date == date('Ymd')) {
 		echo 'TODAY';
@@ -99,21 +99,21 @@ while($current_requests < max_daily_requests) {
 
 	// get JSON
 
-	$raw = json_decode(file_get_contents('http://api.wunderground.com/api/'.$key.'/history_'.$end_date.'/q/'.'Israel/Tel_Aviv'.'.json'),true);
+	$raw = json_decode(file_get_contents('http://api.wunderground.com/api/'.$key.'/history_'.$end_date.'/q/'.'UK/London'.'.json'),true);
 
 
 	// Fill Fields
 
-	$cached["telaviv"][$length]["date"] = $end_date;
+	$cached["london"][$length]["date"] = $end_date;
 
 	foreach ($fields as $field) {
-		$cached["telaviv"][$length][$field] = $raw["history"]["dailysummary"][0][$field];
+		$cached["london"][$length][$field] = $raw["history"]["dailysummary"][0][$field];
 	}
 
 	
 	// Update File
 
-	$fp = fopen('telaviv.json', 'w');
+	$fp = fopen('london.json', 'w');
 	fwrite($fp, json_encode($cached));
 	fclose($fp);
 
@@ -122,7 +122,7 @@ while($current_requests < max_daily_requests) {
 
 	$current_requests += 1;
 
-	echo 'updated ('.$current_requests.' requests)'.PHP_EOL;
+	echo 'updated ('.$current_requests.'/'.max_daily_requests.' requests)'.PHP_EOL;
 	sleep(6);
 
 }
