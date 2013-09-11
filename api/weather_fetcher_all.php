@@ -70,22 +70,34 @@ $today = date("Ymd");
 $refresh = false;
 
 const calls_per_minute = 10;
-const max_daily_requests = 200; // 500
+const max_daily_requests = 300; // 500
 
 $max_iterations = max_daily_requests / calls_per_minute; // * 10
 $current_requests = 0;
 
 $fields = array('rain', 'snow', 'fog', 'thunder', 'tornado', 'hail', 'snowfallm', 'meantempm', 'meanwindspdm', 'precipm', 'meanvism');
 
+$cached = array(
+	json_decode(file_get_contents("toronto.json"),true),
+	json_decode(file_get_contents("bangkok.json"),true),
+	json_decode(file_get_contents("telaviv.json"),true),
+	json_decode(file_get_contents("london.json"),true),
+	json_decode(file_get_contents("helsinki.json"),true),
+	json_decode(file_get_contents("iqaluit.json"),true),
+	json_decode(file_get_contents("joburg.json"),true),
+	json_decode(file_get_contents("saopaulo.json"),true),
+	json_decode(file_get_contents("panama.json"),true),
+	json_decode(file_get_contents("cairo.json"),true),
+);
 
-$cached = json_decode(file_get_contents("telaviv.json"),true);
+$cached = json_decode(file_get_contents("bangkok.json"),true);
 
 while($current_requests < max_daily_requests) {
 
 	// get last date
 
-	$length = count($cached["telaviv"]);
-	$date = $cached["telaviv"][$length-1]["date"];
+	$length = count($cached["bangkok"]);
+	$date = $cached["bangkok"][$length-1]["date"];
 
 	if($date == date('Ymd')) {
 		echo 'TODAY';
@@ -99,21 +111,21 @@ while($current_requests < max_daily_requests) {
 
 	// get JSON
 
-	$raw = json_decode(file_get_contents('http://api.wunderground.com/api/'.$key.'/history_'.$end_date.'/q/'.'Israel/Tel_Aviv'.'.json'),true);
+	$raw = json_decode(file_get_contents('http://api.wunderground.com/api/'.$key.'/history_'.$end_date.'/q/'.'Thailand/Bangkok'.'.json'),true);
 
 
 	// Fill Fields
 
-	$cached["telaviv"][$length]["date"] = $end_date;
+	$cached["bangkok"][$length]["date"] = $end_date;
 
 	foreach ($fields as $field) {
-		$cached["telaviv"][$length][$field] = $raw["history"]["dailysummary"][0][$field];
+		$cached["bangkok"][$length][$field] = $raw["history"]["dailysummary"][0][$field];
 	}
 
 	
 	// Update File
 
-	$fp = fopen('telaviv.json', 'w');
+	$fp = fopen('bangkok.json', 'w');
 	fwrite($fp, json_encode($cached));
 	fclose($fp);
 
