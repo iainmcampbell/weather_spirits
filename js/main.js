@@ -4,6 +4,17 @@
 
 	/**************************************************************************
 		
+		Let's cache some domzzzzz
+	
+	**************************************************************************/
+	
+	var $menu = $("#menu"),
+		$canvas = $('#paper');
+
+
+
+	/**************************************************************************
+		
 		Menu
 		- controls which stage of the experience we are on: menu or level,
 		  and which level
@@ -15,15 +26,20 @@
 		show_menu : function(){
 
 			// show the menu and bind click event handlers
+			$menu.show();
 
 		},
 
 		start_level : function(which_level){
 
 			// hide the menu and unbind all its event handlers
+			$menu.hide();
 
 			// show the canvas object and bind its event handlers
+			p.init()
+			api.currentLevel = which_level;
 			control.init();
+			particles.init();
 			// ground.init();
 
 			// call all the paperjs init functions
@@ -60,6 +76,7 @@
 	
 	var api = {
 
+		currentLevel : undefined,
 		data : {},
 
 		init : function(){
@@ -98,7 +115,7 @@
 
 	/**************************************************************************
 		
-		Paper: Master paperscript controller
+		p: Master paperscript controller
 		- holds the canvas object
 		- any global paperjs config goes here
 
@@ -109,19 +126,40 @@
 	
 	**************************************************************************/
 	
-	var paper = {
-		canvas : document.getElementById('paper'),
+	var p = {
+		canvas : $canvas[0],
 		
 		init : function(){
-			paper.setup(canvas);
+			paper.setup(p.canvas);
+			paper.view.onFrame = p.update;
+			paper.view.onResize = p.debounce;
 		},
 
 		update : function(){
 
-			// particles.update();
+			particles.update();
 			// ground.update();
 
 			paper.view.draw();
+		},
+
+
+		/* Debounced Resize
+		 *
+		 * makes sure all resize functionality only happens once every 500ms:
+		 * otherwise in some browsers resizing makes things hella laggy
+		 * and sometimes breaks them. */
+
+		resizeTimeout : undefined,
+
+		debounce : function(){
+			if(p.resizeTimeout) clearTimeout(p.resizeTimeout);
+			resizeTimeout = setTimeout(p.resize, 500);
+		},
+
+		// all paperscript-related resize functionality should be called from here
+		resize : function(){
+			particles.resize();
 		}
 
 	}
@@ -133,8 +171,7 @@
 
 	/**************************************************************************
 		
-		Paperscript Objects:
-		> Ground
+		Paper: Ground
 	
 	**************************************************************************/
 	
@@ -150,6 +187,96 @@
 		}
 	}
 
+
+	/**************************************************************************
+		
+		Paper: Particles
+	
+	**************************************************************************/
+	
+	var particles = {
+
+		p : [], // the particle array
+		t : [], // the tails array
+
+		numParticles : 50,
+
+		rowLength : 10,
+		numRows : null,
+
+		mx : null,
+		my : null,
+
+		init : function(){
+
+			var h = paper.view.size.height,
+				w = paper.view.size.width,
+				rows = 0,
+				rowCounter = 0;
+
+			particles.numRows = Math.ceil(particles.numParticles/particles.rowLength);
+
+			for (var i = 0; i < particles.numParticles; i++) {
+				particles.p[i] = new paper.Path.Circle([0,0], 10);
+				particles.p[i].fillColor = 'black';				
+			};
+
+			particles.resize();
+
+		},
+
+
+		update : function(){
+
+			// Very simple proximity detection
+
+			var r = paper.view.size.width/15,
+				mx = particles.mx,
+				my = particles.my;
+
+			for (var i = particles.p.length-1; i>=0; i--) {
+				var px = particles.p[i].position.x,
+					py = particles.p[i].position.y;
+
+				// if within range (+/-r)
+				if(mx < px+r && mx > px-r  &&  my < py+r && my > py-r) {
+					particles.p[i].fillColor = 'red';
+				} else {
+					particles.p[i].fillColor = 'black';
+				}
+			};
+
+		},
+
+
+		resize : function(){
+
+			var h = paper.view.size.height,
+				w = paper.view.size.width,
+				rows = 0,
+				rowCounter = 0,
+				xSpacing = w/particles.rowLength,
+				ySpacing = h/particles.numRows;
+
+			for (var i = 0; i < particles.numParticles; i++) {
+
+				var x = ((rowCounter*xSpacing) * 0.8) + (w*0.1); // (position * overall_width) + left
+				var y = ((rows*ySpacing ) * 0.8) + (h*0.1);      // (position * overall_height) + top
+
+				particles.p[i].position = [x,y];
+
+				rowCounter++;
+				if(rowCounter > particles.rowLength) {
+					rows++;
+					rowCounter = 0;
+				}
+			};
+
+		},
+
+
+
+	}
 
 
 
@@ -168,7 +295,7 @@
 
 		init : function(){
 
-			$(document).keydown(function(e){
+			$(document).on('keydown', function(e){
 			    switch(e.which) {
 			        // case 37: // left
 			        // 	break;
@@ -191,6 +318,15 @@
 			    e.preventDefault();
 			});
 
+
+			$canvas.on('mousemove',function(e){
+				var point = [e.pageX,e.pageY];
+
+				particles.mx = e.pageX;
+				particles.my = e.pageY;
+			})
+
+
 			if(Modernizr.touch) {
 
 				console.log('touch enabled')
@@ -209,10 +345,18 @@
 
 		},
 
+		destroy : function(){
+
+			$(document).off('keydown')
+
+			// off touch
+
+		},
+
 		// Process the running action ********************************************************
 
 		go : function(){
-
+			console.log('go')
 		}
 
 
