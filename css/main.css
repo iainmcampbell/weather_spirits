@@ -18,3 +18,24 @@ body {
   width: 500px;
   background: #eeeeee;
 }
+
+#background,#background2 {
+  height: 500px;
+  width: 100%;
+  background-image: url('bg.png');
+  background-repeat: repeat-x;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+#background2{
+  top: 50px;
+  background-image: url('bg.png');
+}
+
+#paper{
+  position: relative;
+  z-index: 1;
+}

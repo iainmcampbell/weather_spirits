@@ -41,7 +41,7 @@
 			control.init();
 			// particles.init();
 			ground.init();
-			// ground.update();
+			ground.update();
 
 			// call all the paperjs init functions
 
@@ -139,7 +139,7 @@
 		update : function(){
 
 			particles.update();
-			// ground.update();
+			ground.update();
 
 			paper.view.draw();
 		},
@@ -270,14 +270,14 @@
 
 		update : function(){
 
-			paper.setup('paper');
-
+			// paper.setup('paper');
+		
 		
 			
-			paper.view.onFrame = function(event) {
-				// console.log(ground.pan1.speed);
-				// console.log('la')
-				// console.log(speed, distance);
+			// paper.view.onFrame = function(event) {
+				console.log(ground.pan1.speed);
+				console.log('la')
+				console.log(speed, distance);
 		
 				ground.accelerate();
 		
@@ -292,7 +292,7 @@
 				}
 				ground.groundpath.smooth();
 				
-			}
+			// }
 		
 		}
 
@@ -594,7 +594,7 @@
 		// kite.update();
 
 		api.init();
-		// ground.init();
+		ground.init();
 		ground.update();
 		// // preloader.init(); // if we write a preloader
 
