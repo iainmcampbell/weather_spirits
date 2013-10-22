@@ -32,18 +32,20 @@
 
 		start_level : function(which_level){
 
+			api.currentLevel = which_level;
+
 			// hide the menu and unbind all its event handlers
 			$menu.hide();
 
 			// show the canvas object and bind its event handlers
-			// p.init()
-			api.currentLevel = which_level;
-			control.init();
-			// particles.init();
-			ground.init();
-			// ground.update();
 
-			// call all the paperjs init functions
+			// common modules
+			p.init()
+			control.init();
+
+			// specific modules
+			particles.init();
+			ground.init();
 
 		}
 	}
@@ -131,6 +133,7 @@
 		canvas : $canvas[0],
 		
 		init : function(){
+			paper.install(window);
 			paper.setup(p.canvas);
 			paper.view.onFrame = p.update;
 			paper.view.onResize = p.debounce;
@@ -139,7 +142,7 @@
 		update : function(){
 
 			particles.update();
-			// ground.update();
+			ground.update();
 
 			paper.view.draw();
 		},
@@ -207,6 +210,8 @@
 			$('#background2').pan(ground.pan2);
 			$('#background').pan(ground.pan1);
 
+
+
 			var windowwidth= $(window).width();
 		
 			function dividewidth(){
@@ -223,14 +228,15 @@
 		
 			dividewidth();
 
-			control.speed = 0;
 			ground.height= randonum() * 10 + 50;
 			ground.amount = 5;
 
+
+			control.speed = 0;
 			control.accelerating = false;
 			control.distance = 0;
 
-			paper.setup('paper');
+			// paper.setup('paper');
 		
 			
 			ground.groundpath = new paper.Path({
@@ -270,82 +276,52 @@
 
 		update : function(){
 
-			paper.setup('paper');
-
-		
+			ground.accelerate();
 			
-			paper.view.onFrame = function(event) {
-				// console.log(ground.pan1.speed);
-				// console.log('la')
-				// console.log(speed, distance);
-		
-				ground.accelerate();
-		
-				
-				for (var i = 0; i <= ground.amount; i++) {
-		
-					var segment = ground.groundpath.segments[i];
-					var sinus = Math.sin(control.distance + i) * (control.speed/10);
-					control.distance += control.speed * 0.01;
-					segment.point.y = sinus * ground.height + 400;
 			
-				}
-				ground.groundpath.smooth();
-				
+			for (var i = 0; i <= ground.amount; i++) {
+			
+				var segment = ground.groundpath.segments[i];
+				var sinus = Math.sin(control.distance + i) * (control.speed/10);
+				control.distance += control.speed * 0.01;
+				segment.point.y = sinus * ground.height + 400;
+			
 			}
+
+			ground.groundpath.smooth();
+
+
+
+			// paper.setup('paper');
+
+			// paper.view.onFrame = function(event) {
+
+			// 	// console.log(ground.pan1.speed);
+			// 	// console.log('la')
+			// 	// console.log(speed, distance);
+		
+			// 	ground.accelerate();
+		
+				
+			// 	for (var i = 0; i <= ground.amount; i++) {
+		
+			// 		var segment = ground.groundpath.segments[i];
+			// 		var sinus = Math.sin(control.distance + i) * (control.speed/10);
+			// 		control.distance += control.speed * 0.01;
+			// 		segment.point.y = sinus * ground.height + 400;
+			
+			// 	}
+
+			// 	ground.groundpath.smooth();
+				
+			// }
 		
 		}
 
 		
 	}
 
-	/**************************************************************************
-		
-		Paper: KITE
-	
-	**************************************************************************/
-	
-	// var kite = {
 
-	// 	kiteobj : {},
-	// 	kitepos : { x: 100, y: 100},
-
-
-	// 	init : function(){
-
-	// 		paper.setup('paper');
-
-	// 		kite.kiteobj = new paper.Path.Circle(new paper.Point(kite.kitepos.x, kite.kitepos.y), 50);
-
-	// 		kite.kiteobj.fillColor = 'black';
-	// 		// console.log(kite.kiteobj);
-
-	// 	},
-
-
-	// 	update : function(){
-
-	// 		paper.setup('paper');
-		
-		
-			
-	// 		paper.view.onFrame = function(event) {
-
-	// 			kite.kitepos.x = control.currentpos.x;
-	// 			kite.kitepos.y = control.currentpos.y;
-
-	// 			// console.log(kite.kiteobj);
-	// 		}
-
-
-	// 	},
-
-
-	// 	resize : function(){
-
-
-
-	// 	},
 
 
 
@@ -372,6 +348,8 @@
 		my : null,
 
 		init : function(){
+
+			console.log(paper.view)
 
 			var h = paper.view.size.height,
 				w = paper.view.size.width,
@@ -595,7 +573,7 @@
 
 		api.init();
 		// ground.init();
-		ground.update();
+		// ground.update();
 		// // preloader.init(); // if we write a preloader
 
 
