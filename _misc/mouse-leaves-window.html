@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>paper-1</title>
+
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		body { overflow: hidden; }
+	</style>
+</head>
+<body>
+
+
+<script src="js/jquery-1.10.2.min.js"></script>
+
+<script>
+	
+
+	// http://stackoverflow.com/questions/923299/how-can-i-detect-when-the-mouse-leaves-the-window#answer-3187524
+	// cross-browser event handler (Peter-Paul Koch)
+	function addEvent(obj, evt, fn) {
+	    if (obj.addEventListener) {
+	        obj.addEventListener(evt, fn, false);
+	    }
+	    else if (obj.attachEvent) {
+	        obj.attachEvent("on" + evt, fn);
+	    }
+	}
+
+	function addMouseoutEvent(callback){
+		// Mouse leaves window
+		addEvent(document, "mouseout", function(e) {
+		    e = e ? e : window.event;
+		    var from = e.relatedTarget || e.toElement;
+		    if (!from || from.nodeName == "HTML") {
+		        if(callback) {
+		        	if(typeof callback === 'function')
+		        		callback();
+		        }
+		    }
+		});
+	}
+
+	$(document).ready(function(){
+
+		addMouseoutEvent(function(){
+	        $('body').css('background','black')
+		})
+		
+
+		// mousemove = we're back
+		addEvent(document, "mousemove", function(e) {
+		    e = e ? e : window.event;
+		    var from = e.relatedTarget || e.toElement;
+		    if (!from || from.nodeName == "HTML") {
+		        $('body').css('background','white')
+		    }
+		});
+
+
+	})
+
+
+
+</script>
+	
+</body>
+</html>
+
