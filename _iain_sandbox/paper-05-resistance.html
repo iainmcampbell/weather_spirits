@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>paper-1</title>
+
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		body { overflow: hidden; }
+	</style>
+</head>
+<body>
+
+	<canvas id="paper" resize></canvas>
+
+	<script src="js/jquery-1.10.2.min.js"></script>
+	<script src="js/paper-full.min.js"></script>
+
+<script>
+
+	var $canvas = $('#paper'),
+		canvas = $canvas[0],
+		particles,
+		the_tool;
+
+	update = function(e){
+		particles.update(e);
+		paper.view.draw();
+	}
+
+	debounce = function(){
+		if(p.resizeTimeout) clearTimeout(p.resizeTimeout);
+		resizeTimeout = setTimeout(p.resize, 500);
+	}
+
+	resize = function(){
+
+	}
+
+	// Util *************************************************
+
+	function math_sin(val, multiplier, floor) {
+		return (1-Math.sin(val)) * multiplier + floor;
+	};
+
+	function ceil(val,ceiling){
+		if(val>ceiling) return ceiling;
+		else return val;
+	}
+
+	// t: current time, b: begInnIng value, c: change In value, d: duration
+	function easeOutSine (t, b, c, d) {
+		return c * Math.sin(t/d * (Math.PI/2)) + b;
+	};
+
+	function cap (v, min, max) {
+		if(v < min) return min;
+		if(v > max) return max;
+		else return v;
+	}
+
+
+
+	// Particles ********************************************************
+
+	var Particles = function(){
+
+		var h = paper.view.size.height,
+			w = paper.view.size.width,
+			mx, my;
+
+
+		var base = new Point(w-w/3, h/3); // base position: 2/3 x 2/3
+
+		var y_max = h/4, x_max = y_max; // bounds
+
+
+		var line;
+
+		function helpers(){
+
+			var from = new Point(base.x - x_max, base.y - y_max)
+			var to   = new Point(base.x + x_max, base.y + y_max)
+
+			var bounding_box = new Path.Rectangle(from,to);
+			bounding_box.fillColor = '#eeeeee'
+
+			var base_dot = new Path.Circle({
+				center : [w-w/3, h/3],
+				radius : 5,
+				style : {
+					strokeColor: 'black',
+					strokeWidth: 1
+				} 
+			})
+
+			line = new Path.Line(base,target);
+
+			line.strokeColor = 'blue';
+			line.strokeWeight = 1;
+
+		}
+
+		helpers();
+
+
+		
+
+
+
+		var c = new Path.Circle({
+			center: [w-w/3, h/3],
+			radius: 20,
+			style: {
+				strokeColor: 'orange',
+				strokeWidth: 2
+			}
+		});
+
+		var target = new Point(0,0); //
+
+
+		this.mousemove = function(e) {
+			moving = true;
+
+			mx = e.event.pageX;
+			my = e.event.pageY;
+
+			target = new Point(mx,my);
+
+			line.segments[1].point = target;
+		}
+
+		
+
+		// Update *************************************************
+
+		this.update = function(e){
+
+
+			// ********************************************************
+			// easing
+
+			var x_resistance = cap( Math.abs(base.x-target.x), 0, x_max)
+			x_resistance = easeOutSine( x_resistance, 1, -1, x_max)
+
+			var y_resistance = cap( Math.abs(base.y-target.y), 0, y_max)
+			y_resistance = easeOutSine( y_resistance, 1, -1, y_max)
+
+			line.strokeWidth = (x_resistance + y_resistance) * 10 + 1;
+			line.strokeColor = new Color(x_resistance, y_resistance, 0)
+
+
+
+
+			// var x_diff = 1-( x_max - Math.abs(target.x - target.x) ) / x_max // 1-0 diff
+			// var y_diff = 1-( y_max - Math.abs(target.y - target.y) ) / y_max
+
+			// x_diff = cap(x_diff, 0,1)
+			// y_diff = cap(y_diff, 0,1)
+
+			// // t: current time, b: beginning value, c: change in value, d: duration
+			// var x_factor = easeOutSine(x_diff, 1, -1, 1);
+			// var y_factor = easeOutSine(y_diff, 1, -1, 1);
+
+			// // console.log(Math.round(x_diff*100) + '\t' + Math.round(y_diff*100))
+
+
+			// // ********************************************************
+			// // calculate and apply our vector
+
+			// var motion_vector = target.subtract(c.position);
+
+			// motion_vector.x = motion_vector.x * x_factor;
+			// motion_vector.y = motion_vector.y * y_factor;
+
+			// if(motion_vector.length > w/100) motion_vector.length = w/100
+
+			// c.position = c.position.add(motion_vector)
+
+		}
+
+
+
+	}
+
+
+	$(document).ready(function(){
+		paper.install(window);
+
+		paper.setup(canvas);
+		paper.view.onFrame = update;
+		paper.view.onResize = debounce;
+
+		particles = new Particles();
+
+		the_tool = new paper.Tool();
+		the_tool.fixedDistance = 1;
+		the_tool.activate();
+
+		the_tool.on('mousemove',particles.mousemove)
+
+		
+	})
+
+</script>
+	
+</body>
+</html>
+

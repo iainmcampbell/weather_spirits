@@ -1,0 +1,112 @@
+@import "variables"
+
+/* Utility Classes ---------------------------------------- */
+
+.unselectable
+  -webkit-touch-callout: none
+  -webkit-user-select: none
+  -khtml-user-select: none
+  -moz-user-select: moz-none
+  -ms-user-select: none
+  user-select: none
+
+.nopointerevents
+  pointer-events: none
+
+// image replacement (for use with background-image)
+.ir
+  background-color: transparent
+  border: 0
+  overflow: hidden
+  *text-indent: -9999px
+  &:before
+    content: ""
+    display: block
+    width: 0
+    height: 150%
+
+// completely hidden
+.hidden
+  display: none !important
+  visibility: hidden
+
+// hidden but available for screenreaders
+.visuallyhidden
+  border: 0
+  clip: rect(0 0 0 0)
+  height: 1px
+  margin: -1px
+  overflow: hidden
+  padding: 0
+  position: absolute
+  width: 1px
+  &.focusable
+    &:active, &:focus
+      clip: auto
+      height: auto
+      margin: 0
+      overflow: visible
+      position: static
+      width: auto
+
+// hide visually and from screenreaders, but maintain layout
+.invisible
+  visibility: hidden
+
+.clearfix
+  &:before
+    content: " "
+    display: table
+  &:after
+    content: " "
+    display: table
+    clear: both
+  *zoom: 1
+
+
+
+/* Icomoon ---------------------------------------- */
+
+// @font-face 
+//   font-family: 'icomoon'
+//   src: url('fonts/icomoon.eot')
+//   src: url('fonts/icomoon.eot?#iefix') format('embedded-opentype'), url('fonts/icomoon.woff') format('woff'), url('fonts/icomoon.ttf') format('truetype'), url('fonts/icomoon.svg#icomoon') format('svg')
+//   font-weight: normal
+//   font-style: normal
+
+// .icomoon
+//   font-family: 'icomoon'
+
+// .icon-share:before
+//   content: "\53"
+
+// .icon-bike-icon:before
+//   content: "\42"
+
+// .icon-play:before
+//   content: "\50"
+
+// .icon-arrow-left:before
+//   content: "\4c"
+
+// .icon-arrow-right:before
+//   content: "\52"
+
+// .icon-arrow-up:before
+//   content: "\55"
+
+// .icon-arrow-down:before
+//   content: "\44"
+
+// .icon-remove-sign:before
+//   content: "\58"
+
+// .icon-ok-sign:before
+//   content: "\59"
+
+// .icon-facebook:before
+//   content: "\46"
+
+// .icon-twitter:before
+//   content: "\54"
+

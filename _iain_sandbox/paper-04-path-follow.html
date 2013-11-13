@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>paper-1</title>
+
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		body { overflow: hidden; }
+	</style>
+</head>
+<body>
+
+	<canvas id="paper" resize></canvas>
+
+	<script src="js/jquery-1.10.2.min.js"></script>
+	<script src="js/paper-full.min.js"></script>
+
+<script>
+
+
+	var $canvas = $('#paper'),
+		canvas = $canvas[0],
+		particles,
+		the_tool;
+
+	update = function(e){
+		particles.update(e);
+		paper.view.draw();
+	}
+
+	debounce = function(){
+		if(p.resizeTimeout) clearTimeout(p.resizeTimeout);
+		resizeTimeout = setTimeout(p.resize, 500);
+	}
+
+	resize = function(){
+
+	}
+
+	var mousepath;
+
+
+	// Particles ********************************************************
+
+	var Particles = function(){
+
+		var h = paper.view.size.height,
+			w = paper.view.size.width,
+			mx, my;
+
+		var c = new Path.Circle({
+			center: [0,0],
+			radius: 50
+		});
+
+		c.style = {
+			fillColor: 'white',
+			strokeColor: 'orange',
+			strokeWidth: 20
+		}
+
+		mousepath = new Path();
+		mousepath.fullySelected = true;
+
+		var moving = false;
+
+		this.mousemove = function(e) {
+			moving = true;
+			mx = e.event.pageX;
+			my = e.event.pageY;
+			mousepath.add( new Point(mx,my) )
+		}
+
+		// Util *************************************************
+
+		function math_sin(val, multiplier, floor) {
+			return (1-Math.sin(val)) * multiplier + floor;
+		};
+
+		function ceil(val,ceiling){
+			if(val>ceiling) return ceiling;
+			else return val;
+		}
+
+		// Update *************************************************
+
+		this.update = function(e){
+
+			if(moving){
+				c.strokeColor = 'orange';
+
+				var target = new Point(mousepath.segments[0].point)
+				
+				var diff_vector = target.subtract(c.position);
+
+				if(diff_vector.getDistance(target) > 10) diff_vector.length = 10;
+
+				c.position = c.position.add(diff_vector);
+
+				// we've reached the last point -> get rid of it
+				if(target.getDistance(c.position) < 10) {
+					mousepath.segments.shift();
+				}
+
+				if(mousepath.segments.length < 1) {
+					moving = false;
+					c.strokeColor = 'red';
+				}
+			}
+
+		}
+
+
+
+	}
+
+
+	$(document).ready(function(){
+		paper.install(window);
+
+		paper.setup(canvas);
+		paper.view.onFrame = update;
+		paper.view.onResize = debounce;
+
+		particles = new Particles();
+
+		the_tool = new paper.Tool();
+		the_tool.fixedDistance = 50;
+		the_tool.activate();
+
+		the_tool.on('mousemove',particles.mousemove)
+
+		
+	})
+
+</script>
+	
+</body>
+</html>
+

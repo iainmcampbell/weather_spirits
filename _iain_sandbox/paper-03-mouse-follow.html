@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>paper-1</title>
+
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		body { overflow: hidden; }
+	</style>
+</head>
+<body>
+
+	<canvas id="paper" resize></canvas>
+
+	<script src="js/jquery-1.10.2.min.js"></script>
+	<script src="js/paper-full.min.js"></script>
+
+<script>
+
+	/**************************************************************************
+		
+		Linear vector follow
+	
+	**************************************************************************/
+
+
+	var $menu = $("#menu"),
+		$canvas = $('#paper');
+
+	paper.install(window);
+
+
+	var particles;
+
+	var p = {
+		canvas : $canvas[0],
+		
+		init : function(){
+			paper.setup(p.canvas);
+			paper.view.onFrame = p.update;
+			paper.view.onResize = p.debounce;
+
+			paper.tool.fixedDistance = 10;
+			particles = new Particles();
+		},
+
+		update : function(e){
+
+			// e.delta, time, count
+			particles.update(e);
+			paper.view.draw();
+
+		},
+
+
+		resizeTimeout : undefined,
+
+		debounce : function(){
+			if(p.resizeTimeout) clearTimeout(p.resizeTimeout);
+			resizeTimeout = setTimeout(p.resize, 500);
+		},
+
+		resize : function(){
+
+		}
+
+	}
+
+
+	var Particles = function(){
+
+		var h = paper.view.size.height,
+			w = paper.view.size.width,
+			mx, my;
+
+		var c = new Path.Circle({
+			center: [0,0],
+			radius: 100
+		});
+
+		c.style = {
+			fillColor: 'red',
+			strokeColor: 'black',
+			strokeWidth: 1
+		}
+
+		$canvas.on('mousemove',function(e){
+			mx = e.pageX;
+			my = e.pageY;
+			
+
+		})
+
+		// Util *************************************************
+
+		function math_sin(val, multiplier, floor) {
+			return (1-Math.sin(val)) * multiplier + floor;
+		};
+
+		// Update *************************************************
+
+		this.update = function(e){
+
+			var cachedPos = c.position;
+
+			var mousePos = new Point(mx,my);
+
+			var vector = mousePos.subtract(cachedPos);
+
+			if(vector.x > 10) vector.x = 10;
+			if(vector.y > 10) vector.y = 10;
+
+			c.position = cachedPos.add(vector)
+
+		}
+	}
+
+
+	$(document).ready(function(){
+		p.init();
+	})
+
+</script>
+	
+</body>
+</html>
+

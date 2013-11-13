@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>paper-1</title>
+
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		body { overflow: hidden; }
+	</style>
+</head>
+<body>
+
+	<canvas id="paper" resize></canvas>
+
+	<script src="js/jquery-1.10.2.min.js"></script>
+	<script src="js/paper-full.min.js"></script>
+
+<script>
+
+	// Util *************************************************
+
+	function math_sin(val, multiplier, floor) {
+		return (1-Math.sin(val)) * multiplier + floor;
+	};
+
+	function ceil(val,ceiling){
+		if(val>ceiling) return ceiling;
+		else return val;
+	}
+
+	// t: current time, b: begInnIng value, c: change In value, d: duration
+	function easeOutSine (t, b, c, d) {
+		return c * Math.sin(t/d * (Math.PI/2)) + b;
+	};
+
+	function cap (v, min, max) {
+		if(v < min) return min;
+		if(v > max) return max;
+		else return v;
+	}
+
+
+
+	// Setup ********************************************************
+
+	var debug = true;
+
+	var $canvas = $('#paper'),
+		canvas = $canvas[0],
+		particles,
+		the_tool;
+
+	$(document).ready(function(){
+		paper.install(window);
+
+		paper.setup(canvas);
+		paper.view.onFrame = function(e){
+
+			// particles.update(e);
+			df.update(e);
+
+			paper.view.draw();
+		};
+
+		// paper.view.onResize = debounce;
+
+
+		df = new DF();
+		// particles = new Particles();
+
+		the_tool = new paper.Tool();
+		the_tool.fixedDistance = 1;
+		the_tool.activate();
+
+		// the_tool.on('mousemove',particles.mousemove)
+		the_tool.on('mousemove',df.mousemove)
+	})
+
+
+
+
+
+
+	// Directional_Follow ********************************************************
+
+	var df;
+	var DF = function(){
+
+		var h = paper.view.size.height,
+			w = paper.view.size.width,
+			mx, my;
+
+		var y_max = h/4,
+			x_max = y_max; // bounds
+
+		var base  = new Point(w-w/3, h/3), // centre of the bounding box
+			kite  = new Point(w-w/3-100, h/3-100),
+			mouse = new Point(0,0);
+
+
+
+
+		// Helpers
+
+		if(debug){
+			var text = [
+				new PointText(new Point(30,30)),
+				new PointText(new Point(30,60)),
+				new PointText(new Point(30,90)),
+				new PointText(new Point(30,120)),
+			];
+
+			$.each(text, function(index, el) {
+				el.fillColor = 'black' ;
+				el.scale(2);
+				el.content = "text"
+			});
+
+			var from = new Point(base.x - x_max, base.y - y_max)
+			var to   = new Point(base.x + x_max, base.y + y_max)
+			var bounding_box = new Path.Rectangle(from,to);
+			bounding_box.fillColor = '#eeeeee';
+
+			var base_marker = new Path.Circle({
+				center : base,
+				radius : 5,
+				style : {
+					strokeColor: 'black',
+					strokeWidth: 1
+				} 
+			})
+		}
+
+		
+
+
+
+		
+
+		// Actuals
+
+		var kite_marker = new Path.Circle({
+			center : kite,
+			radius : 3,
+			style : {
+				fillColor: 'red'
+			}
+		})
+
+
+
+
+
+
+		// ********************************************************
+		this.mousemove = function(e){
+			moving = true;
+
+			mx = e.event.pageX;
+			my = e.event.pageY;
+
+			mouse = new Point(mx,my);
+		}
+
+		// ********************************************************
+		this.update = function(){
+
+			// Calculate the normalized quadrant positions 
+			// of the mouse and the kite, as well as booleans
+
+			//  ––––––– –––––––
+			// | -1,-1 |  1,-1 |
+			//  –––––––0–––––––
+			// | -1, 1 |  1, 1 |
+			//  ––––––– –––––––
+
+			var mouse_diff_float = [
+				cap( (mx-base.x), -x_max, x_max) / x_max,
+				cap( (my-base.y), -y_max, y_max) / y_max
+			];
+
+			var mouse_diff_bool = [
+				(mouse_diff_float[0] > 0) ? true : false,
+				(mouse_diff_float[1] > 0) ? true : false
+			];
+
+
+			var kite_diff_float = [
+				cap( (kite.x - base.x), -x_max, x_max) / x_max,
+				cap( (kite.y - base.y), -y_max, y_max) / y_max
+			];
+
+			var kite_diff_bool = [
+				(kite_diff_float[0] > 0) ? true : false,
+				(kite_diff_float[1] > 0) ? true : false
+			];
+
+			if(debug) {
+				text[0].content = 'mouse_diff: ' + mouse_diff_float[0] + ' ' + mouse_diff_float[1]
+				text[1].content = 'mouse_bool: ' + mouse_diff_bool[0] + ' ' + mouse_diff_bool[1]	
+				text[2].content = 'kite_bool: ' + kite_diff_bool[0] + ' ' + kite_diff_bool[1]	
+			}
+
+
+			// If the kite is in a different quadrant than the mouse,
+			// it's going towards the base, so don't apply resistance.
+			// Otherwise, apply resistance based on how far the kite is
+			// from the base.
+
+			// X
+			if(kite_diff_bool[0] !== mouse_diff_bool[0]) {
+				x_resistance = 1;
+			} else {
+				var diff = cap( Math.abs(base.x-kite.x), 0, x_max);
+				x_resistance = easeOutSine( diff, 1, -1, x_max);
+			}
+
+			// Y
+			if(kite_diff_bool[1] !== mouse_diff_bool[1]) {
+				y_resistance = 1;
+			} else {
+				var diff = cap( Math.abs(base.y-kite.y), 0, y_max);
+				y_resistance = easeOutSine( diff, 1, -1, y_max);
+			}
+
+			var position_resistance = new Point(x_resistance, y_resistance);
+
+
+
+
+			// calculate and apply the movement vector
+
+			var diff = mouse.subtract(kite);
+			if(diff.length > 5) diff.length = 5; // cap speed
+
+			diff = diff.multiply(position_resistance)
+
+			if(debug) text[3].content = 'speed = ' + diff.length;
+
+			kite = kite.add(diff);
+
+			// visualize it
+
+			kite_marker.position = kite;
+
+
+
+
+
+		}
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	}
+
+</script>
+	
+</body>
+</html>
+

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>paper-1</title>
+</head>
+<body>
+
+
+	<canvas id="paper" resize></canvas>
+
+
+
+<script src="js/lib/jquery-1.10.2.min.js"></script>
+<script src="js/lib/paper-full.min.js"></script>
+
+<script>
+
+	var $menu = $("#menu"),
+		$canvas = $('#paper');
+
+
+	var particles;
+
+	var p = {
+		canvas : $canvas[0],
+		
+		init : function(){
+			paper.setup(p.canvas);
+			paper.view.onFrame = p.update;
+			paper.view.onResize = p.debounce;
+
+			paper.tool.fixedDistance = 10;
+			particles = new Particles();
+		},
+
+		update : function(e){
+
+			// e.delta, time, count
+			particles.update(e);
+			paper.view.draw();
+
+		},
+
+
+		resizeTimeout : undefined,
+
+		debounce : function(){
+			if(p.resizeTimeout) clearTimeout(p.resizeTimeout);
+			resizeTimeout = setTimeout(p.resize, 500);
+		},
+
+		// all paperscript-related resize functionality should be called from here
+		resize : function(){
+			particles.resize();
+		}
+
+	}
+
+
+	// Control ********************************************************
+
+	var control = {
+
+		// mouse coords
+		mx : 0,
+		my : 0,
+
+		pct_x : 0,
+		pct_y : 0,
+
+		// forward motion speed
+		speed : 0,
+
+		init : function(){
+
+			$canvas.on('mousemove',function(e){
+
+				var point = [e.pageX,e.pageY];
+
+				control.mx = e.pageX;
+				control.my = e.pageY;
+
+				control.pct_x = e.pageX / paper.view.size.width;
+				control.pct_y = e.pageY / paper.view.size.height;
+
+			})
+
+		}
+
+	}
+
+
+	var Particles = function(){
+
+		var h = paper.view.size.height,
+			w = paper.view.size.width,
+			mx = control.pct_x,
+			my = control.pct_y;
+
+
+		var p0, p1
+
+		// Path Object *******************************************
+
+		var p = new paper.Path();
+
+		p.segments = [ [0,0],[0,0],[0,0],[0,0],[0,0] ];
+		// p.fullySelected = true;
+		p.style = {
+			strokeColor: 'black',
+			strokeWidth: 1
+		}
+
+		var const_w = paper.view.size.width * 0.8;
+
+		// Util *************************************************
+
+		// function lerp(min, max, val) {
+		//     return (1-val)*min+val*max;
+		// };
+
+		function math_sin(val, multiplier, floor) {
+			return (1-Math.sin(val)) * multiplier + floor;
+		};
+
+		// Update *************************************************
+
+		this.update = function(e){
+
+			// h = paper.view.size.height;
+			// w = paper.view.size.width;
+			mx = control.mx;
+			my = control.my;
+
+			var segment1 = [];
+			segment1[1] = math_sin(e.time, 100, 100)
+			segment1[0] = const_w + (segment1[1]*0.1);
+
+			// console.log(segment1)
+			
+			p.segments = [
+				segment1,
+				[mx,my]
+			];
+		}
+	}
+
+
+	$(document).ready(function(){
+		p.init();
+		control.init();
+	})
+
+</script>
+	
+</body>
+</html>
+
