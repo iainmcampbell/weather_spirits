@@ -39,15 +39,21 @@
 
 			// show the canvas object and bind its event handlers
 
+
 			// common modules
-			p.init()
+			
+			p.init();
 			control.init();
 
-			// specific modules
-			particles.init();
+			// *****************************
+			// CANVAS MODULE INITS GO HERE
+
+			// particles.init();
 			ground.init();
 
+
 		}
+		
 	}
 
 
@@ -141,7 +147,7 @@
 
 		update : function(){
 
-			particles.update();
+			// particles.update();
 			ground.update();
 
 			paper.view.draw();
@@ -163,260 +169,8 @@
 
 		// all paperscript-related resize functionality should be called from here
 		resize : function(){
-			particles.resize();
+			// particles.resize();
 		}
-
-	}
-
-
-
-	
-
-
-	/**************************************************************************
-		
-		Paper: Ground
-	
-	**************************************************************************/
-	
-
-	var ground = {
-
-		
-
-		divisions : [],
-		height : 0,
-		amount : 5,
-		groundpath : {},
-
-		pan1 : {
-			fps: 30,
-			speed: 1,
-			dir: 'left'
-		},
-
-		pan2 : {
-			fps: 30,
-			speed: .25,
-			dir: 'right'
-		},
-
-
-
-
-
-		init : function(){
-
-			$('#background2').pan(ground.pan2);
-			$('#background').pan(ground.pan1);
-
-
-
-			var windowwidth= $(window).width();
-		
-			function dividewidth(){
-				for (var i = 0; i <= 5; i++) {
-					var x= i/5 * windowwidth;
-					ground.divisions.push(x);
-				}
-		
-			};
-
-			function randonum(){
-				return Math.floor((Math.random()*10));
-			};
-		
-			dividewidth();
-
-			ground.height= randonum() * 10 + 50;
-			ground.amount = 5;
-
-
-			control.speed = 0;
-			control.accelerating = false;
-			control.distance = 0;
-
-			// paper.setup('paper');
-		
-			
-			ground.groundpath = new paper.Path({
-				strokeColor: [0.5],
-				strokeWidth: 20,
-				strokeCap: 'square'
-			});
-			
-			for (var i = 0; i <= ground.amount; i++) {
-				var x= i/ground.amount * paper.view.size.width;
-				ground.groundpath.add(new paper.Point(x, 1) );
-			}
-
-		},
-
-		accelerate : function(){
-
-			if(control.accelerating && control.speed>=3) {
-			
-					control.speed = 3;
-					return;
-			
-			} else if(control.accelerating && control.speed<3) {
-			
-					control.speed += control.spdinc;
-			
-			} else {
-			
-					if(control.speed <= 0) {
-						control.speed = 0;
-						return;
-					} else {
-						control.speed -= control.spdinc;
-					}
-				}
-		},
-
-		update : function(){
-
-			ground.accelerate();
-			
-			
-			for (var i = 0; i <= ground.amount; i++) {
-			
-				var segment = ground.groundpath.segments[i];
-				var sinus = Math.sin(control.distance + i) * (control.speed/10);
-				control.distance += control.speed * 0.01;
-				segment.point.y = sinus * ground.height + 400;
-			
-			}
-
-			ground.groundpath.smooth();
-
-
-
-			// paper.setup('paper');
-
-			// paper.view.onFrame = function(event) {
-
-			// 	// console.log(ground.pan1.speed);
-			// 	// console.log('la')
-			// 	// console.log(speed, distance);
-		
-			// 	ground.accelerate();
-		
-				
-			// 	for (var i = 0; i <= ground.amount; i++) {
-		
-			// 		var segment = ground.groundpath.segments[i];
-			// 		var sinus = Math.sin(control.distance + i) * (control.speed/10);
-			// 		control.distance += control.speed * 0.01;
-			// 		segment.point.y = sinus * ground.height + 400;
-			
-			// 	}
-
-			// 	ground.groundpath.smooth();
-				
-			// }
-		
-		}
-
-		
-	}
-
-
-
-
-
-	// }
-
-
-	/**************************************************************************
-		
-		Paper: Particles
-	
-	**************************************************************************/
-	
-	var particles = {
-
-		p : [], // the particle array
-		t : [], // the tails array
-
-		numParticles : 50,
-
-		rowLength : 10,
-		numRows : null,
-
-		mx : null,
-		my : null,
-
-		init : function(){
-
-			console.log(paper.view)
-
-			var h = paper.view.size.height,
-				w = paper.view.size.width,
-				rows = 0,
-				rowCounter = 0;
-
-			particles.numRows = Math.ceil(particles.numParticles/particles.rowLength);
-
-			for (var i = 0; i < particles.numParticles; i++) {
-				particles.p[i] = new paper.Path.Circle([0,0], 10);
-				particles.p[i].fillColor = 'black';				
-			};
-
-			particles.resize();
-
-		},
-
-
-		update : function(){
-
-			// Very simple proximity detection
-
-			var r = paper.view.size.width/15,
-				mx = particles.mx,
-				my = particles.my;
-
-			for (var i = particles.p.length-1; i>=0; i--) {
-				var px = particles.p[i].position.x,
-					py = particles.p[i].position.y;
-
-				// if within range (+/-r)
-				if(mx < px+r && mx > px-r  &&  my < py+r && my > py-r) {
-					particles.p[i].fillColor = 'red';
-				} else {
-					particles.p[i].fillColor = 'black';
-				}
-			};
-
-		},
-
-
-		resize : function(){
-
-			var h = paper.view.size.height,
-				w = paper.view.size.width,
-				rows = 0,
-				rowCounter = 0,
-				xSpacing = w/particles.rowLength,
-				ySpacing = h/particles.numRows;
-
-			for (var i = 0; i < particles.numParticles; i++) {
-
-				var x = ((rowCounter*xSpacing) * 0.8) + (w*0.1); // (position * overall_width) + left
-				var y = ((rows*ySpacing ) * 0.8) + (h*0.1);      // (position * overall_height) + top
-
-				particles.p[i].position = [x,y];
-
-				rowCounter++;
-				if(rowCounter > particles.rowLength) {
-					rows++;
-					rowCounter = 0;
-				}
-			};
-
-		},
-
-
 
 	}
 
@@ -431,100 +185,20 @@
 
 	var control = {
 
-
+		// MASTER VARIABLE
+		// range 0-3 -> change to 0-1
 		speed : 0,
+		accelerating : false,
+
+		speedfix: 0,
 		currentpos : { x: -1, y: -1 },
 		spdinc : 0,
-		accelerating : false,
 		distance: 0,
+		spawnqeues: 0,
 
 		init : function(){
 
-			
-
-			$(document).on('keydown', function(e){
-			    switch(e.which) {
-			        // case 37: // left
-			        // 	break;
-
-			        case 39: // right
-			        	control.go();
-			        	break;
-
-			        // case 38: // up
-				       //  break;
-
-			        // case 40: // down
-				       //  break;
-
-			        // case 32: // space
-			        // 	break;
-
-			        default: return; // exit this handler for other keys
-			    }
-			    e.preventDefault();
-			});
-
-			
-
-			$canvas.on('mousemove',function(e){
-				var point = [e.pageX,e.pageY];
-
-				particles.mx = e.pageX;
-				particles.my = e.pageY;
-
-				control.currentpos = { x: e.pageX, y: e.pageY };
-
-
-				if (control.currentpos.x > $(ground.divisions).get(0) && control.currentpos.x < $(ground.divisions).get(1) ) {
-					control.accelerating=false;
-					control.spdinc= 0.04;
-					$('#background').spStop();
-					$('#background2').spStop();
-				}
-				
-				if (control.currentpos.x > $(ground.divisions).get(1) && control.currentpos.x < $(ground.divisions).get(2) ) {
-					control.accelerating = false;
-					control.spdinc= 0.01;
-					$('#background').spStart();
-					$('#background2').spStart();
-					$('#background').spSpeed(.25);
-					$('#background2').spSpeed(1); 
-				}
-				if (control.currentpos.x > $(ground.divisions).get(2) && control.currentpos.x < $(ground.divisions).get(3) ) {
-					control.accelerating = true;
-					control.spdinc= 0.02;
-					$('#hills').spSpeed(20);
-					$('#background').spSpeed(.5);
-					$('#background2').spSpeed(4); 
-					
-				}
-				if (control.currentpos.x > $(ground.divisions).get(3) && control.currentpos.x < $(ground.divisions).get(4) ) {
-					control.accelerating = true;
-					control.spdinc= 0.04;
-					$('#background').spSpeed(1);
-					$('#background2').spSpeed(7);
-				}
-				if (control.currentpos.x > $(ground.divisions).get(4) && control.currentpos.x < $(ground.divisions).get(5) ) {
-					control.accelerating = true;
-					control.spdinc= 0.06;
-					$('#background').spSpeed(2);
-					$('#background2').spSpeed(12);
-					
-				}
-
-
-				// control.speed+=1;
-
-				// console.log(control.speed);
-				// console.log(ground.divisions);
-				// console.log(control.currentpos.x);
-				// console.log(control.accelerating);
-				// console.log(control.spdinc);
-
-			
-			})
-
+			$canvas.on('mousemove.control', control.go)
 
 			if(Modernizr.touch) {
 
@@ -536,28 +210,93 @@
 				// $('*').css('transform','translate3d(0,0,0)')
 
 				// Hammer(document)
-				// 	.on("swipeleft", function(){ s.next() })
-				// 	.on("swiperight",function(){ s.prev() })
+				// 	.on("swipeleft",  function(){ s.next() })
+				// 	.on("swiperight", function(){ s.prev() })
 
 			}
 
 
 		},
 
+		go : function(e){
+
+			var point = [e.pageX,e.pageY];
+
+			particles.mx = e.pageX;
+			particles.my = e.pageY;
+
+			control.currentpos = { x: e.pageX, y: e.pageY };
+
+
+			if (control.currentpos.x > $(ground.divisions).get(0) && control.currentpos.x < $(ground.divisions).get(1) ) {
+				control.accelerating=false;
+				control.spdinc= 0.04;
+				$('#background').spStop();
+				$('#background2').spStop();
+			}
+			
+			if (control.currentpos.x > $(ground.divisions).get(1) && control.currentpos.x < $(ground.divisions).get(2) ) {
+				control.accelerating = false;
+				control.spdinc= 0.01;
+				$('#background').spStart();
+				$('#background2').spStart();
+				$('#background').spSpeed(.25);
+				$('#background2').spSpeed(1); 
+			}
+			if (control.currentpos.x > $(ground.divisions).get(2) && control.currentpos.x < $(ground.divisions).get(3) ) {
+				control.accelerating = true;
+				control.spdinc= 0.02;
+				$('#hills').spSpeed(20);
+				$('#background').spSpeed(.5);
+				$('#background2').spSpeed(4); 
+				
+			}
+			if (control.currentpos.x > $(ground.divisions).get(3) && control.currentpos.x < $(ground.divisions).get(4) ) {
+				control.accelerating = true;
+				control.spdinc= 0.04;
+				$('#background').spSpeed(1);
+				$('#background2').spSpeed(7);
+			}
+			if (control.currentpos.x > $(ground.divisions).get(4) && control.currentpos.x < $(ground.divisions).get(5) ) {
+
+				
+				control.accelerating = true;
+				control.spdinc= 0.06;
+				$('#background').spSpeed(2);
+				$('#background2').spSpeed(12);
+				
+			}
+
+
+			// control.speed+=1;
+
+			// console.log(control.speed);
+			// console.log(ground.divisions);
+			// console.log(control.currentpos.x);
+			// console.log(control.accelerating);
+			// console.log(control.spdinc);
+
+		
+		},
+
+		speedfixit : function(){
+
+			if(control.speed != 0){
+				control.speedfix= control.speed;
+			}
+			else{
+				control.speedfix=0;
+			}
+			
+		},
+
 		destroy : function(){
 
-			$(document).off('keydown')
+			$canvas.off('mousemove.control');
 
 			// off touch
 
 		},
-
-		// Process the running action ********************************************************
-
-		go : function(){
-			console.log('go')
-		}
-
 
 	}
 
@@ -568,22 +307,13 @@
 
 	$(document).ready(function(){
 
-		// kite.init();
-		// kite.update();
+		// preloader.init(); // if we write a preloader
 
 		api.init();
-		// ground.init();
-		// ground.update();
-		// // preloader.init(); // if we write a preloader
 
+		// menu.show_menu(); // PRODUCTION (normal functionality)
 
-		// PRODUCTION
-
-		menu.show_menu();
-
-		// DEVELOPMENT
-
-		menu.start_level('toronto')
+		menu.start_level('toronto') // DEVELOPMENT (shortcut to starting first level)
 
 	})
 
