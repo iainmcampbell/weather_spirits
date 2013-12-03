@@ -1,6 +1,8 @@
 
 // (function(window){
 
+	// ASCII -> http://patorjk.com/software/taag/#p=display&f=Big&t=Control
+
 
 	/**************************************************************************
 		
@@ -51,6 +53,10 @@
 			// particles.init();
 			ground.init();
 
+			swarm.initSwarm();
+			swarm.add(10);
+			kite.initKite();
+
 
 		}
 		
@@ -60,8 +66,13 @@
 
 
 	/**************************************************************************
-		
-		API
+		          _____ _____ 
+		    /\   |  __ \_   _|
+		   /  \  | |__) || |  
+		  / /\ \ |  ___/ | |  
+		 / ____ \| |    _| |_ 
+		/_/    \_\_|   |_____|
+		                      
 		- loads the weather data from an external JSON file
 		- data is accessible from:
 			api.data.<city>.[
@@ -106,6 +117,13 @@
 
 	/**************************************************************************
 		
+		 _    _ _   _ _ 
+		| |  | | | (_) |
+		| |  | | |_ _| |
+		| |  | | __| | |
+		| |__| | |_| | |
+		 \____/ \__|_|_|
+		                
 		Various utility functions
 	
 	**************************************************************************/
@@ -117,14 +135,38 @@
 		    return nMin + (nMax - nMin) * ((value - oMin) / (oMax - oMin));
 		},
 
+		cap : function(v, min, max) {
+			if(v < min) return min;
+			if(v > max) return max;
+			else return v;
+		},
+
+		rand : function(min, max) {
+		  return Math.random() * (max - min) + min;
+		},
+
+
+		// t: current time, b: begInnIng value, c: change In value, d: duration
+		easeOutSine : function(t, b, c, d) {
+			return c * Math.sin(t/d * (Math.PI/2)) + b;
+		},
+
 	}
 
 
 
 
+
+
 	/**************************************************************************
-		
-		p: Master paperscript controller
+		 _____  
+		|  __ \ 
+		| |__) |
+		|  ___/ 
+		| |     
+		|_|     
+
+		Master paperscript controller
 		- holds the canvas object
 		- any global paperjs config goes here
 
@@ -149,7 +191,9 @@
 
 			// particles.update();
 			ground.update();
+			kite.draw();
 
+			swarm.updateSwarm( kite.kite.position );
 			paper.view.draw();
 		},
 
@@ -176,9 +220,16 @@
 
 
 
+
+
 	/**************************************************************************
-		
-		Control (for the game)
+		  _____            _             _ 
+		 / ____|          | |           | |
+		| |     ___  _ __ | |_ _ __ ___ | |
+		| |    / _ \| '_ \| __| '__/ _ \| |
+		| |___| (_) | | | | |_| | | (_) | |
+		 \_____\___/|_| |_|\__|_|  \___/|_|
+		                                   
 		- input handlers -> speed variable
 	
 	**************************************************************************/
@@ -221,9 +272,6 @@
 		go : function(e){
 
 			var point = [e.pageX,e.pageY];
-
-			particles.mx = e.pageX;
-			particles.my = e.pageY;
 
 			control.currentpos = { x: e.pageX, y: e.pageY };
 

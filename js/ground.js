@@ -169,7 +169,6 @@ var ground = {
 		            ground.finish = ground.point2;
 		            break;
 
-		        case ground.point1.5:
 		        case ground.point2:
 		            ground.finish = ground.point3;
 		            break;
@@ -212,7 +211,7 @@ var ground = {
 		ground.masterspawner.position.x += ground.spawnX;
 		ground.masterspawner.position.y += ground.spawnY;
 
-		console.log( ground.current_frame + ' ' + ground.max_frames )
+		// console.log( ground.current_frame + ' ' + ground.max_frames )
 		
 		// *******************************************************************************************
 
