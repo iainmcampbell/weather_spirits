@@ -51,10 +51,10 @@
 			// CANVAS MODULE INITS GO HERE
 
 			// particles.init();
-			ground.init();
+			// ground.init();
 
 			swarm.initSwarm();
-			swarm.add(10);
+			swarm.add(2);
 			kite.initKite();
 
 
@@ -157,7 +157,6 @@
 
 
 
-
 	/**************************************************************************
 		 _____  
 		|  __ \ 
@@ -173,7 +172,6 @@
 		update()
 		- calls all the draw functions from different modules
 		- runs the actual paperjs draw frame function
-
 	
 	**************************************************************************/
 	
@@ -190,7 +188,7 @@
 		update : function(){
 
 			// particles.update();
-			ground.update();
+			// ground.update();
 			kite.draw();
 
 			swarm.updateSwarm( kite.kite.position );

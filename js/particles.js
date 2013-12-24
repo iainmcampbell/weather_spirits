@@ -19,13 +19,13 @@
 **************************************************************************/
 
 // Class definition
-function Spirit(_point, _offset, _speed){
+function Spirit(_offset, _speed){
 
 	this.offset = _offset; // vector distance from kite
 	this.speed  = _speed;  // random variation in follow speed
 
 	this.circle = new Path.Circle({
-		center : _point,
+		center : new Point(0,0),
 		radius : 5,
 		style : {
 			fillColor: 'blue'
@@ -48,11 +48,26 @@ var swarm = {
 	// ********************************************************
 	add : function(howmany){
 		for (var i = 0; i < howmany; i++) {
-			var point  = new Point(0,0);
-			var offset = new Point( util.rand(-100,-200), util.rand(-50,50)  );
+
+			// calculate where in the grid the new spirit should go
+			var base      	 = new Point(-100,-150),
+				intervalx    = -30, // spacing between points
+				intervaly    = 30,
+				pointsPerCol = 5;
+
+			var columnNumber  = swarm.array.length / Math.floor(pointsPerCol),
+				positionInCol = swarm.array.length % pointsPerCol;
+
+			var x = base.x + (intervalx*columnNumber),
+				y = base.y + (intervaly*positionInCol);
+
+			var offset = new Point(x,y);
+
 			var speed  = util.rand(2,4);
 
-			this.array.push( new Spirit(point, offset, speed) );
+			console.log('new spirit: [%i,%i] %f',x,y,speed);
+
+			this.array.push( new Spirit(offset, speed) );
 		};
 
 		this.len = this.array.length;
@@ -74,15 +89,19 @@ var swarm = {
 
 		for (var i=this.len-1; i>=0; i--) {
 
+			// calculate vector to desired destination
 			var destination = base_position.add(this.array[i].offset);
 			
 			var diff = this.array[i].circle.position.subtract(destination);
 
 			// TODO: add acceleration
 
-			if(diff.length > this.array[i].speed) diff.length = this.array[i].speed; // cap speed
+			// cap speed
+			if(diff.length > this.array[i].speed) diff.length = this.array[i].speed;
 
-			this.array[i].circle.position = this.array[i].circle.position.subtract(diff);
+			// apply final position
+			var finalPos = this.array[i].circle.position.subtract(diff);
+			this.array[i].circle.position = finalPos;
 
 		};
 
