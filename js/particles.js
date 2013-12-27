@@ -19,7 +19,7 @@
 **************************************************************************/
 
 // Class definition
-function Spirit(_center, _offset, _speed){
+function Spirit(_center, _offset, _speed, _color){
 
 	this.offset = _offset; // vector distance from kite
 	this.speed  = _speed;  // random variation in follow speed
@@ -28,15 +28,15 @@ function Spirit(_center, _offset, _speed){
 		center : _center,
 		radius : 5,
 		style : {
-			fillColor: 'blue'
+			fillColor: 'red'
 		}
 	});
 
 	var zero = new Point(0,0);
 
 	this.tail = new Path({
-		segments: [ [0,0], [0,0], [0,0] ],
-		strokeColor: 'red',
+		segments: [ [0,0], [0,0], [0,0], [0,0] ],
+		strokeColor: _color,
 		strokeWidth: 3,
 		strokeCap: 'round'
 	});
@@ -78,12 +78,31 @@ var swarm = {
 			var offset   = new Point(x,y);
 	
 			// calculate other parameters			
-			var speed    = util.rand(2,4); // random speed
+			var speed    = util.rand(2,6); // random speed
 			var startPos = new Point(w*0.3, h*0.7); // TODO: align this to the ground
+
+			// color!
+			var colorCode = Math.floor(util.rand(0,3)),
+				color;
+
+			switch(colorCode) {
+				case 0:
+					color = new Color(util.rand(0.7,1), util.rand(0,0.2), 0);
+					break;
+				case 1:
+					color = new Color(0, util.rand(0.5,1), 0);
+					break;
+				case 2:
+					color = new Color(0, util.rand(0,0.2), util.rand(0.7,1));
+					break;
+				case 3:
+					color = new Color(0, util.rand(0.2,0.8), util.rand(0.2,0.8));
+					break;
+			}
 
 			console.log('new spirit: [%i,%i] %f',x,y,speed);
 
-			this.array.push( new Spirit(startPos, offset, speed) );
+			this.array.push( new Spirit(startPos, offset, speed, color) );
 		};
 
 		this.len = this.array.length;
@@ -117,7 +136,9 @@ var swarm = {
 			diff,
 			finalPos;
 
-		var sin = Math.sin(frameCount/10);
+		var sin  = Math.sin(frameCount/10 + control.distance/2),
+			sin2 = Math.sin(frameCount/10 + control.distance/2 + 10),
+			sin3 = Math.sin(frameCount/10 + control.distance/2 + 20);
 
 		for (var i=this.len-1; i>=0; i--) {
 
@@ -140,8 +161,9 @@ var swarm = {
 			// TAIL
 
 			this.array[i].tail.segments[0].point = finalPos;
-			this.array[i].tail.segments[1].point = finalPos.add(new Point(-20,0));
-			this.array[i].tail.segments[2].point = finalPos.add(new Point(-40,0));
+			this.array[i].tail.segments[1].point = finalPos.add(new Point(-20, sin  * this.array[i].speed   ));
+			this.array[i].tail.segments[2].point = finalPos.add(new Point(-40, sin2 * this.array[i].speed/2 ));
+			this.array[i].tail.segments[3].point = finalPos.add(new Point(-60, sin3 * this.array[i].speed/4 ));
 
 
 		};
