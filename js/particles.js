@@ -30,7 +30,16 @@ function Spirit(_center, _offset, _speed){
 		style : {
 			fillColor: 'blue'
 		}
-	})
+	});
+
+	var zero = new Point(0,0);
+
+	this.tail = new Path({
+		segments: [ [0,0], [0,0], [0,0] ],
+		strokeColor: 'red',
+		strokeWidth: 3,
+		strokeCap: 'round'
+	});
 
 }
 
@@ -108,12 +117,15 @@ var swarm = {
 			diff,
 			finalPos;
 
+		var sin = Math.sin(frameCount/10);
+
 		for (var i=this.len-1; i>=0; i--) {
 
 			// calculate vector to desired destination
 			destination = base_position.add(this.array[i].offset);
 			
 			diff = this.array[i].circle.position.subtract(destination);
+			diff = diff.add(new Point(0,sin*this.array[i].speed))
 
 			// TODO: add acceleration?
 
@@ -123,6 +135,14 @@ var swarm = {
 			// apply final position
 			finalPos = this.array[i].circle.position.subtract(diff);
 			this.array[i].circle.position = finalPos;
+
+			// ********************************************************
+			// TAIL
+
+			this.array[i].tail.segments[0].point = finalPos;
+			this.array[i].tail.segments[1].point = finalPos.add(new Point(-20,0));
+			this.array[i].tail.segments[2].point = finalPos.add(new Point(-40,0));
+
 
 		};
 

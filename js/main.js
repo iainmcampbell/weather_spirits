@@ -167,6 +167,8 @@
 			    };
 	})();
 
+	var frameCount = 0;
+
 
 
 
@@ -204,6 +206,7 @@
 		update : function(){
 
 			requestAnimationFrame(p.update);
+			frameCount++;
 
 			ground.update();
 			kite.draw();
