@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>paper-1</title>
+
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		body { overflow: hidden; }
+	</style>
+</head>
+<body>
+
+	<canvas id="paper" resize></canvas>
+
+	<script src="js/jquery-1.10.2.min.js"></script>
+	<script src="js/paper-full.min.js"></script>
+
+<script>
+
+	/**************************************************************************
+		
+		util
+
+		debug
+
+		setup
+
+		draw {}
+
+		swarm {}
+
+		kite {}
+	
+	**************************************************************************/
+
+
+	// Util *************************************************
+
+	var util = {
+
+		map : function(value, oMin, oMax, nMin, nMax){
+		    return nMin + (nMax - nMin) * ((value - oMin) / (oMax - oMin));
+		},
+
+		cap : function(v, min, max) {
+			if(v < min) return min;
+			if(v > max) return max;
+			else return v;
+		},
+
+		rand : function(min, max) {
+		  return Math.random() * (max - min) + min;
+		},
+
+
+		// t: current time, b: begInnIng value, c: change In value, d: duration
+		easeOutSine : function(t, b, c, d) {
+			return c * Math.sin(t/d * (Math.PI/2)) + b;
+		},
+
+	}
+
+
+
+
+	// Setup ********************************************************
+
+	var debug = true;
+
+	var $canvas = $('#paper'),
+		canvas = $canvas[0],
+		particles,
+		the_tool;
+
+	var mousePos;
+
+	var w, h;
+
+	$(document).ready(function(){
+		paper.install(window);
+		paper.setup(canvas);
+
+		w = paper.view.size.width;
+		h = paper.view.size.height;
+
+		test.init();
+
+		function onFrame(){
+			test.draw();
+			paper.view.draw();
+		}
+
+		paper.view.on('frame',onFrame);
+
+
+		// ********************************************************
+		the_tool = new paper.Tool();
+		the_tool.fixedDistance = 1;
+		the_tool.activate();
+
+		the_tool.on('mousemove', function(e){
+			mousePos = new Point(e.event.pageX, e.event.pageY);
+		})
+
+
+		// Debug ********************************************************
+
+		if(debug) {
+			debug = {
+				text : [
+					new PointText(new Point(30,30)),
+					new PointText(new Point(30,60)),
+					new PointText(new Point(30,90)),
+					new PointText(new Point(30,120)),
+				],
+
+				initDebug : function(){
+					$.each(this.text, function(index, el) {
+						el.fillColor = 'black' ;
+						el.scale(2);
+						el.content = "text"
+					});
+				}
+				
+			}
+
+			debug.initDebug();
+		}
+	})
+
+
+
+
+
+
+
+	/**************************************************************************
+		
+		Swarm
+
+			Spirit(Point point, Point offset, Point delay)
+
+			swarm.add(howmany)
+
+			swarm.updateSwarm(base_position)
+	
+	**************************************************************************/
+	
+	// Class definition
+	function Spirit(_point, _offset, _speed){
+
+		this.offset = _offset; // vector distance from kite
+		this.speed  = _speed;  // random variation in follow speed
+
+		this.circle = new Path.Circle({
+			center : _point,
+			radius : 5,
+			style : {
+				fillColor: 'blue'
+			}
+		})
+
+	}
+
+	var test = {
+
+		a : null,
+		b : null,
+
+		array : [],
+		len : 0,
+
+		init : function(){
+
+			var p = new Point(w/2,h/2);
+
+			this.array.push( new Spirit(new Point(w/2,h/2), 0, 5) );
+			this.array.push( new Spirit(new Point(w/2,h/2), 0, 5) );
+
+			len = this.array.length;
+
+		},
+
+		draw : function(){
+
+			var base_position = mousePos;
+
+
+			for (var i=this.len-1; i>=0; i--) {
+
+				var destination = base_position.add(this.array[i].offset);
+				
+				var diff = this.array[i].circle.position.subtract(destination);
+
+				// TODO: add acceleration
+
+				// cap speed
+				if(diff.length > this.array[i].speed) diff.length = this.array[i].speed;
+
+				// Bad Proximity Detection Algorithm
+
+				var semiFinalPos = this.array[i].circle.position.subtract(diff);
+
+				// for (var k=this.len-1; k>=0; k--) {
+
+				// 	if(i===k) continue; // don't test against ourself
+
+				// 	var pos = this.array[i].circle.position;
+
+				// 	if( pos.isClose( this.array[k].circle.position, 50 )) {
+						
+				// 		this.array[i].circle.style.fillColor ='red';
+
+				// 		// move away
+				// 		var angle = pos.getAngle(this.array[k].circle.position);
+				// 		var directedAngle = pos.getDirectedAngle(this.array[k].circle.position);
+
+
+				// 	} else {
+				// 		this.array[i].circle.style.fillColor = 'blue';
+				// 	}
+				// };
+
+				// apply final position
+				this.array[i].circle.position = semiFinalPos;
+
+			};
+
+
+
+
+		}
+
+
+	}
+
+
+</script>
+	
+</body>
+</html>
+

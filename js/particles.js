@@ -19,13 +19,13 @@
 **************************************************************************/
 
 // Class definition
-function Spirit(_offset, _speed){
+function Spirit(_center, _offset, _speed){
 
 	this.offset = _offset; // vector distance from kite
 	this.speed  = _speed;  // random variation in follow speed
 
 	this.circle = new Path.Circle({
-		center : new Point(0,0),
+		center : _center,
 		radius : 5,
 		style : {
 			fillColor: 'blue'
@@ -38,6 +38,7 @@ var swarm = {
 
 	array : [],
 	len : 0,
+	added : false, // so we don't add multiple spirits
 
 	// ********************************************************
 	initSwarm : function(){
@@ -47,6 +48,10 @@ var swarm = {
 
 	// ********************************************************
 	add : function(howmany){
+
+		var h = paper.view.size.height;
+		var w = paper.view.size.width;
+
 		for (var i = 0; i < howmany; i++) {
 
 			// calculate where in the grid the new spirit should go
@@ -58,16 +63,18 @@ var swarm = {
 			var columnNumber  = swarm.array.length / Math.floor(pointsPerCol),
 				positionInCol = swarm.array.length % pointsPerCol;
 
-			var x = base.x + (intervalx*columnNumber),
-				y = base.y + (intervaly*positionInCol);
+			var x = base.x + (intervalx*columnNumber) + util.rand(-5,5),
+				y = base.y + (intervaly*positionInCol) + util.rand(-5,5);
 
-			var offset = new Point(x,y);
-
-			var speed  = util.rand(2,4);
+			var offset   = new Point(x,y);
+	
+			// calculate other parameters			
+			var speed    = util.rand(2,4); // random speed
+			var startPos = new Point(w*0.3, h*0.7); // TODO: align this to the ground
 
 			console.log('new spirit: [%i,%i] %f',x,y,speed);
 
-			this.array.push( new Spirit(offset, speed) );
+			this.array.push( new Spirit(startPos, offset, speed) );
 		};
 
 		this.len = this.array.length;
@@ -83,24 +90,38 @@ var swarm = {
 	},
 
 	// ********************************************************
-	updateSwarm : function(base_position){
+	updateSwarm : function(base_position, distance){
+
+		// add new units to swarm at an interval
+		if( Math.floor(distance % 20) == 19 ) {
+			if(swarm.added == false && swarm.array.length < 52) {
+				swarm.added = true;
+				swarm.add(1);	
+			}
+		} else {
+			swarm.added = false;
+		}
 
 		if(this.len <= 0) return;
+
+		var destination,
+			diff,
+			finalPos;
 
 		for (var i=this.len-1; i>=0; i--) {
 
 			// calculate vector to desired destination
-			var destination = base_position.add(this.array[i].offset);
+			destination = base_position.add(this.array[i].offset);
 			
-			var diff = this.array[i].circle.position.subtract(destination);
+			diff = this.array[i].circle.position.subtract(destination);
 
-			// TODO: add acceleration
+			// TODO: add acceleration?
 
 			// cap speed
 			if(diff.length > this.array[i].speed) diff.length = this.array[i].speed;
 
 			// apply final position
-			var finalPos = this.array[i].circle.position.subtract(diff);
+			finalPos = this.array[i].circle.position.subtract(diff);
 			this.array[i].circle.position = finalPos;
 
 		};
@@ -303,8 +324,6 @@ var kite = {
 	draw : function(){
 
 		kite.kite.position = kite.updatePosition( kite.kite.position );
-
-		swarm.updateSwarm( kite.kite.position );
 
 		kite.kite_string.segments[0].point = kite.kite.position;
 		kite.kite_string.segments[1].point = kite.runner.position;

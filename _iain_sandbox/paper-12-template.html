@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>paper-1</title>
+
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		body { overflow: hidden; }
+	</style>
+</head>
+<body>
+
+	<canvas id="paper" resize></canvas>
+
+	<script src="js/jquery-1.10.2.min.js"></script>
+	<script src="js/paper-full.min.js"></script>
+
+<script>
+
+	/**************************************************************************
+		
+		util
+
+		debug
+
+		setup
+
+		draw {}
+
+		swarm {}
+
+		kite {}
+	
+	**************************************************************************/
+
+
+	// Util *************************************************
+
+	var util = {
+
+		map : function(value, oMin, oMax, nMin, nMax){
+		    return nMin + (nMax - nMin) * ((value - oMin) / (oMax - oMin));
+		},
+
+		cap : function(v, min, max) {
+			if(v < min) return min;
+			if(v > max) return max;
+			else return v;
+		},
+
+		rand : function(min, max) {
+		  return Math.random() * (max - min) + min;
+		},
+
+
+		// t: current time, b: begInnIng value, c: change In value, d: duration
+		easeOutSine : function(t, b, c, d) {
+			return c * Math.sin(t/d * (Math.PI/2)) + b;
+		},
+
+	}
+
+
+
+
+	// Setup ********************************************************
+
+	var debug = true;
+
+	var $canvas = $('#paper'),
+		canvas = $canvas[0],
+		particles,
+		the_tool;
+
+	$(document).ready(function(){
+		paper.install(window);
+		paper.setup(canvas);
+
+		test.init();
+
+		function onFrame(){
+			test.draw();
+			paper.view.draw();
+		}
+
+		paper.view.on('frame',onFrame);
+
+
+		// ********************************************************
+		the_tool = new paper.Tool();
+		the_tool.fixedDistance = 1;
+		the_tool.activate();
+
+		the_tool.on('mousemove', function(e){
+			
+		})
+
+
+		// Debug ********************************************************
+
+		if(debug) {
+			debug = {
+				text : [
+					new PointText(new Point(30,30)),
+					new PointText(new Point(30,60)),
+					new PointText(new Point(30,90)),
+					new PointText(new Point(30,120)),
+				],
+
+				initDebug : function(){
+					$.each(this.text, function(index, el) {
+						el.fillColor = 'black' ;
+						el.scale(2);
+						el.content = "text"
+					});
+				}
+				
+			}
+
+			debug.initDebug();
+		}
+	})
+
+
+
+
+
+
+
+	/**************************************************************************
+		
+		Swarm
+
+			Spirit(Point point, Point offset, Point delay)
+
+			swarm.add(howmany)
+
+			swarm.updateSwarm(base_position)
+	
+	**************************************************************************/
+	
+	// Class definition
+	function Spirit(_point, _offset, _speed){
+
+		this.offset = _offset; // vector distance from kite
+		this.speed  = _speed;  // random variation in follow speed
+
+		this.circle = new Path.Circle({
+			center : _point,
+			radius : 5,
+			style : {
+				fillColor: 'blue'
+			}
+		})
+
+	}
+
+	var test = {
+
+		init : function(){
+
+		},
+
+		draw : function(){
+
+		}
+
+
+	}
+
+
+</script>
+	
+</body>
+</html>
+

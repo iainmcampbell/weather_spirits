@@ -50,8 +50,7 @@
 			// *****************************
 			// CANVAS MODULE INITS GO HERE
 
-			// particles.init();
-			// ground.init();
+			ground.init();
 
 			swarm.initSwarm();
 			swarm.add(2);
@@ -154,6 +153,21 @@
 	}
 
 
+	var cancelAnimationFrame = window.webkitRequestAnimationFrame || window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+
+	window.requestAnimationFrame = (function() {
+
+		return  window.requestAnimationFrame       || 
+		        window.webkitRequestAnimationFrame || 
+		        window.mozRequestAnimationFrame    || 
+		        window.oRequestAnimationFrame      || 
+		        window.msRequestAnimationFrame     || 
+		        function(/* function */ callback, /* DOMElement */ element){
+			        window.setTimeout(callback, 1000 / 60);
+			    };
+	})();
+
+
 
 
 
@@ -174,24 +188,26 @@
 		- runs the actual paperjs draw frame function
 	
 	**************************************************************************/
-	
+
 	var p = {
 		canvas : $canvas[0],
 		
 		init : function(){
 			paper.install(window);
 			paper.setup(p.canvas);
-			paper.view.onFrame = p.update;
+			// paper.view.onFrame = p.update;
 			paper.view.onResize = p.debounce;
+
+			requestAnimationFrame(p.update);
 		},
 
 		update : function(){
 
-			// particles.update();
-			// ground.update();
-			kite.draw();
+			requestAnimationFrame(p.update);
 
-			swarm.updateSwarm( kite.kite.position );
+			ground.update();
+			kite.draw();
+			swarm.updateSwarm( kite.kite.position, control.distance );
 			paper.view.draw();
 		},
 
@@ -269,48 +285,54 @@
 
 		go : function(e){
 
-			var point = [e.pageX,e.pageY];
+			var point = [e.pageX, e.pageY];
 
 			control.currentpos = { x: e.pageX, y: e.pageY };
 
+			var $bg  = $('#background'),
+				$bg2 = $('#background2');
 
-			if (control.currentpos.x > $(ground.divisions).get(0) && control.currentpos.x < $(ground.divisions).get(1) ) {
+			if (control.currentpos.x > ground.divisions[0] && control.currentpos.x < ground.divisions[1] ) {
 				control.accelerating=false;
 				control.spdinc= 0.04;
-				$('#background').spStop();
-				$('#background2').spStop();
+				$bg.spStop();
+				$bg2.spStop();
+				return;
 			}
 			
-			if (control.currentpos.x > $(ground.divisions).get(1) && control.currentpos.x < $(ground.divisions).get(2) ) {
+			if (control.currentpos.x > ground.divisions[1] && control.currentpos.x < ground.divisions[2] ) {
 				control.accelerating = false;
 				control.spdinc= 0.01;
-				$('#background').spStart();
-				$('#background2').spStart();
-				$('#background').spSpeed(.25);
-				$('#background2').spSpeed(1); 
+				$bg.spStart();
+				$bg2.spStart();
+				$bg.spSpeed(.25);
+				$bg2.spSpeed(1); 
+				return;
 			}
-			if (control.currentpos.x > $(ground.divisions).get(2) && control.currentpos.x < $(ground.divisions).get(3) ) {
+			if (control.currentpos.x > ground.divisions[2] && control.currentpos.x < ground.divisions[3] ) {
 				control.accelerating = true;
 				control.spdinc= 0.02;
 				$('#hills').spSpeed(20);
-				$('#background').spSpeed(.5);
-				$('#background2').spSpeed(4); 
+				$bg.spSpeed(.5);
+				$bg2.spSpeed(4); 
 				
+				return;
 			}
-			if (control.currentpos.x > $(ground.divisions).get(3) && control.currentpos.x < $(ground.divisions).get(4) ) {
+			if (control.currentpos.x > ground.divisions[3] && control.currentpos.x < ground.divisions[4] ) {
 				control.accelerating = true;
 				control.spdinc= 0.04;
-				$('#background').spSpeed(1);
-				$('#background2').spSpeed(7);
+				$bg.spSpeed(1);
+				$bg2.spSpeed(7);
+				return;
 			}
-			if (control.currentpos.x > $(ground.divisions).get(4) && control.currentpos.x < $(ground.divisions).get(5) ) {
 
-				
+			if (control.currentpos.x > ground.divisions[4] && control.currentpos.x < ground.divisions[5] ) {
+
 				control.accelerating = true;
 				control.spdinc= 0.06;
-				$('#background').spSpeed(2);
-				$('#background2').spSpeed(12);
-				
+				$bg.spSpeed(2);
+				$bg2.spSpeed(12);
+				return;
 			}
 
 
