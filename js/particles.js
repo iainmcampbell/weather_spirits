@@ -82,23 +82,7 @@ var swarm = {
 			var startPos = new Point(w*0.3, h*0.7); // TODO: align this to the ground
 
 			// color!
-			var colorCode = Math.floor(util.rand(0,3)),
-				color;
-
-			switch(colorCode) {
-				case 0:
-					color = new Color(util.rand(0.7,1), util.rand(0,0.2), 0);
-					break;
-				case 1:
-					color = new Color(0, util.rand(0.5,1), 0);
-					break;
-				case 2:
-					color = new Color(0, util.rand(0,0.2), util.rand(0.7,1));
-					break;
-				case 3:
-					color = new Color(0, util.rand(0.2,0.8), util.rand(0.2,0.8));
-					break;
-			}
+			var color = new Color(1, util.rand(0,0.5), 0);
 
 			console.log('new spirit: [%i,%i] %f',x,y,speed);
 
