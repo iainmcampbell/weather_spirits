@@ -24,6 +24,7 @@
 	**************************************************************************/
 	
 	var menu = {
+		// level: undefined;
 
 		show_menu : function(){
 
@@ -98,14 +99,20 @@
 		currentLevel : undefined,
 		data : {},
 
-		init : function(){
-			console.log('api.init() -> api.data:')
+		init : function(callback){
+			// console.log('api.init() -> api.data:')
 			// load the data
 
 			$.getJSON('api/data.json', function(json) {
 				api.data = json;
-				console.log(api.data)
+				// console.log(api.data)
+
+				if(callback && typeof(callback) === 'function') {
+					callback();	
+				}
+				
 			});
+			
 
 		}
 
@@ -263,6 +270,7 @@
 		spdinc : 0,
 		distance: 0,
 		spawnqeues: 0,
+		walkspeed: 1,
 
 		init : function(){
 
@@ -292,60 +300,56 @@
 
 			control.currentpos = { x: e.pageX, y: e.pageY };
 
-			var $bg  = $('#background'),
-				$bg2 = $('#background2');
+			// var $bg  = $('#background'),
+			// 	$bg2 = $('#background2');
 
 			if (control.currentpos.x > ground.divisions[0] && control.currentpos.x < ground.divisions[1] ) {
+				control.walkspeed=1;
 				control.accelerating=false;
 				control.spdinc= 0.04;
-				$bg.spStop();
-				$bg2.spStop();
+
+				// ground.scrollSpeed=0;
+
 				return;
 			}
 			
 			if (control.currentpos.x > ground.divisions[1] && control.currentpos.x < ground.divisions[2] ) {
+				control.walkspeed=2;
 				control.accelerating = false;
 				control.spdinc= 0.01;
-				$bg.spStart();
-				$bg2.spStart();
-				$bg.spSpeed(.25);
-				$bg2.spSpeed(1); 
+
+				// ground.scrollSpeed=20;
+
 				return;
 			}
 			if (control.currentpos.x > ground.divisions[2] && control.currentpos.x < ground.divisions[3] ) {
+				control.walkspeed=3;
 				control.accelerating = true;
 				control.spdinc= 0.02;
-				$('#hills').spSpeed(20);
-				$bg.spSpeed(.5);
-				$bg2.spSpeed(4); 
+				// ground.scrollSpeed=30;
+
 				
 				return;
 			}
 			if (control.currentpos.x > ground.divisions[3] && control.currentpos.x < ground.divisions[4] ) {
+				control.walkspeed=4;
 				control.accelerating = true;
 				control.spdinc= 0.04;
-				$bg.spSpeed(1);
-				$bg2.spSpeed(7);
+				// ground.scrollSpeed=40;
+
 				return;
 			}
 
 			if (control.currentpos.x > ground.divisions[4] && control.currentpos.x < ground.divisions[5] ) {
+				control.walkspeed=5;
 
 				control.accelerating = true;
 				control.spdinc= 0.06;
-				$bg.spSpeed(2);
-				$bg2.spSpeed(12);
+
+				// ground.scrollSpeed=50;
+
 				return;
 			}
-
-
-			// control.speed+=1;
-
-			// console.log(control.speed);
-			// console.log(ground.divisions);
-			// console.log(control.currentpos.x);
-			// console.log(control.accelerating);
-			// console.log(control.spdinc);
 
 		
 		},
@@ -378,13 +382,14 @@
 
 	$(document).ready(function(){
 
+
 		// preloader.init(); // if we write a preloader
 
-		api.init();
+		api.init(menu.start_level('toronto'));
 
 		// menu.show_menu(); // PRODUCTION (normal functionality)
 
-		menu.start_level('toronto') // DEVELOPMENT (shortcut to starting first level)
+		 // DEVELOPMENT (shortcut to starting first level)
 
 	})
 

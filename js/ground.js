@@ -1,8 +1,3 @@
-/**************************************************************************
-	
-	Paper: Ground
-
-**************************************************************************/
 
 
 var ground = {
@@ -14,12 +9,10 @@ var ground = {
 	amount : 5,
 	groundpath : {},
 	groundlevel: 0,
-	zoom: 0,
-	zoomY: 0,
 	masterspawner: {},
 	spawnclones: {},
 	finish: undefined,
-	frames: 200,
+
 	spawnX: 0,
 	spawnY: 0,
 	point1: undefined,
@@ -30,29 +23,95 @@ var ground = {
 	point6: undefined,
 	point7: undefined,
 
-	pan1 : {
-		fps: 30,
-		speed: 1,
-		dir: 'left'
+	current: undefined,
+	scrollSpeed: undefined,
+	direction: undefined,
+
+	bgheight: 0,
+	bgOldheight: 100,
+
+
+
+	bgscroll: function(){
+		switch(control.walkspeed){
+			case 1:
+				ground.current -= 0;
+			break;
+			case 2:
+				ground.current -= 1;
+			break;
+			case 3:
+				ground.current -= 2;
+			break;
+			case 4:
+				ground.current -= 3;
+			break;
+			case 5:
+				ground.current -= 4;
+			break;
+		};
+		$('div.bg1').css("backgroundPosition", (ground.direction == 'h') ? ground.current+"px 0" : "0 " + ground.current+"px");
+
+		$('div.bg2').css("backgroundPosition", (ground.direction == 'h') ? (ground.current*2)+"px 0" : "0 " + ground.current+"px");
+			
+		
 	},
 
-	pan2 : {
-		fps: 30,
-		speed: .25,
-		dir: 'right'
+	raise: function(){
+		
+
+		if(control.accelerating===true){
+			if(ground.bgheight<50){
+
+				ground.bgheight+=.1;
+
+				var bob=(ground.bgOldheight-ground.bgheight);
+
+				$('div.bg1,div.bg2').css({
+					'backgroundSize': ''+bob+'% auto'
+				});
+				// ground.height-=.1;
+			}else {
+							
+				// ground.height+=.1;
+			}
+			
+		}else{
+
+			if(ground.bgheight>=0){
+					ground.bgheight-=1;
+
+					var bob=(ground.bgOldheight-ground.bgheight);
+
+					$('div.bg1,div.bg2').css({
+						'backgroundSize': ''+bob+'% auto'
+					});
+				}else{
+					$('div.bg1,div.bg2').css({
+						'backgroundSize': '100% auto'
+					});
+				}	
+			// $('div.bg1,div.bg2').css({
+			// 	'backgroundSize': '100% auto'
+			// });
+		}
 	},
-
-
-
-
 
 	init : function(){
 
 
+		// speed in milliseconds
+		ground.scrollSpeed = 50;
+		
+		// set the default position
+		ground.current = 0;
+
+		// set the direction
+		ground.direction = 'h';
 
 
-		$('#background2').pan(ground.pan2);
-		$('#background').pan(ground.pan1);
+		//Calls the scrolling function repeatedly
+		setInterval("ground.bgscroll()", ground.scrollSpeed);	
 
 
 
@@ -66,13 +125,16 @@ var ground = {
 	
 		};
 
-		function randonum(){
-			return Math.floor((Math.random()*10));
-		};
+		// function randonum(){
+		// 	return Math.floor((Math.random()*10));
+		// };
 	
 		dividewidth();
 
-		ground.height= randonum() * 10 + 50;
+		// ground.height= randonum() * 5 + 50;
+		ground.height= [util.rand(5,40),util.rand(5,40),util.rand(5,40),util.rand(5,40),util.rand(5,40),util.rand(5,40),util.rand(5,40)];
+
+
 		ground.amount = 5;
 
 
@@ -80,12 +142,13 @@ var ground = {
 		control.accelerating = false;
 		control.distance = 0;
 
-		ground.groundlevel= paper.view.size.height/3 * 2;
+		ground.groundlevel= (paper.view.size.height/10) * 8;
 
 		
 		ground.groundpath = new paper.Path({
 			fillColor: [0.5],
 		});
+
 
 		ground.groundpath.add(new paper.Point(-100, ground.groundlevel));
 		
@@ -100,6 +163,9 @@ var ground = {
 		ground.groundpath.add(new paper.Point((paper.view.size.width+100), paper.view.size.height));
 		ground.groundpath.add(new paper.Point(-100, paper.view.size.height));
 
+		ground.groundpath.selected=true;
+		// unite(ground.groundpath);
+
 		// *******************************************************************************************
 
 		ground.point1= [ground.groundpath.segments[0].point.x, ground.groundpath.segments[0].point.y];
@@ -110,28 +176,22 @@ var ground = {
 		ground.point6= [ground.groundpath.segments[5].point.x, ground.groundpath.segments[5].point.y];
 		ground.point7= [ground.groundpath.segments[6].point.x, ground.groundpath.segments[6].point.y];
 
+
+		// target to move to
+		ground.finish = ground.groundpath.segments[7].point.x;
+		
+	
+		
+		// defined vars for onFrame
+		ground.spawnX   = ground.groundpath.segments[1].point.x;
+		ground.spawnY   = ground.groundpath.segments[1].point.y;
+
 		ground.masterspawner= new Path.Ellipse({
-			point: [20, 20],
-			size: [100, 100],
+			point: [ground.spawnX, ground.spawnY],
+			size: [20, 20],
 			fillColor: 'black'
 		});
 
-		// target to move to
-		ground.finish = ground.groundpath.segments[6].point;
-		
-		// how many frame does it take to reach a target
-		// var frames = 200;
-		ground.current_frame = 0;
-		ground.max_frames = 200
-
-		
-		// defined vars for onFrame
-		ground.spawnX   = 0;
-		ground.spawnY   = 0;
-		
-		// position circle on path
-		ground.masterspawner.position.x = ground.finish.x;
-		ground.masterspawner.position.y = ground.finish.y;
 
 	},
 
@@ -158,115 +218,47 @@ var ground = {
 	},
 
 	update : function(){
-		// *******************************************************************************************
 
-		// check if cricle reached its target
-		if (Math.round(ground.masterspawner.position.x) == ground.finish[0] && Math.round(ground.masterspawner.position.y) == ground.finish[1]) 
-		{
-		    switch(ground.finish) {
 
-		        case ground.point1:
-		            ground.finish = ground.point2;
-		            break;
+		ground.raise();
 
-		        case ground.point2:
-		            ground.finish = ground.point3;
-		            break;
 
-		        case ground.point3:
-		            ground.finish = ground.point4;
-		            break;
 
-		        case ground.point4:
-		            ground.finish = ground.point5;
-		            break;
+		ground.spawnY=ground.groundpath.segments[2].point.y;
 
-		        case ground.point5:
-		            ground.finish = ground.point6;
-		            break;
 
-		        case ground.point6:
-		            ground.finish = ground.point7;
-		            break;
-
-		        case ground.point7:
-		            ground.finish = ground.point1;
-		            break;
-
-		        default:
-
-		        	break;
-		    }
-	
+		if(ground.spawnX<=ground.finish){
+			ground.spawnX-=control.speed;
+			if(ground.spawnX<=ground.groundpath.segments[1].point.x){
+				ground.spawnX=ground.finish;
+			}
 		}
-
-		ground.current_frame += 1;
-		if(ground.current_frame > ground.max_frames) ground.current_frame = 0;
 		
-		// calculate the dX and dY
-		ground.spawnX = (ground.finish.x - ground.masterspawner.position.x) / ground.current_frame;
-		ground.spawnY = (ground.finish.y - ground.masterspawner.position.y) / ground.current_frame;
-	
-		// do the movement
-		ground.masterspawner.position.x += ground.spawnX;
-		ground.masterspawner.position.y += ground.spawnY;
 
-		// console.log( ground.current_frame + ' ' + ground.max_frames )
-		
-		// *******************************************************************************************
+		var newpos=[ground.spawnX,ground.spawnY];
+
+		ground.masterspawner.position=newpos;
 
 		if(control.accelerating===true){
 				control.spawnqeues= Math.round(control.distance/10);
-				// console.log(control.spawnqeues);
-				// console.log(api.data.toronto[control.spawnqeues]);
+				
 			}
-
-
-		control.speedfixit();
 		
-		// console.log(control.speedfix);
-
-		
-		var setfallback= 100 - (control.distance/10);
-		// ground.zoom=(100 - (control.speed * 20 ) );
-		ground.zoom=(setfallback - ((control.speed/3)*10) );
-		ground.zoomY=(control.distance);
-
-			// ground.zoom1=(100-(control.distance * 0.1 ) );
-
-			if( ground.zoom <= 40){
-				ground.zoom=20;
-				// return false;
-			}
-
-			// if( ground.zoomY >= 300 ){
-			// 	ground.zoomY = 300;
-			// 	// return false;
-			// }
-
-			// console.log('zoom=',ground.zoom,'zoomY=',ground.zoomY);
-
-			if (ground.zoom> 40) {
-				$('#background2,#background').css('background-size',''+ground.zoom+'% auto');
-			};
-
-			if (ground.zoomY<30) {
-				$('#background').css('margin-top',''+ground.zoomY+'px');
-				$('#background2').css('margin-top',''+ground.zoomY+'px');
-
-			};
-			
-			// console.log(ground.zoomY);
 
 		ground.accelerate();
 		
 		
-		for (var i = 0; i <= ground.amount; i++) {
+		for (var i = 0; i <= ground.amount+1; i++) {
 		
 			var segment = ground.groundpath.segments[i];
-			var sinus = Math.sin(control.distance + i) * (control.speed/10);
+			// var sinus = Math.sin(control.distance + i) * (control.speed/10);
+			var sinus = Math.sin(control.distance + i);
 			control.distance += control.speed * 0.01;
-			segment.point.y = sinus * ground.height + 400;
+			// ground.height= util.rand(25,35);
+			segment.point.y = sinus * ground.height[i] + ground.groundlevel;
+			if (segment.point.y < ground.groundlevel+.5 && segment.point.y < ground.groundlevel-.5){
+				ground.height[i]=util.rand(5,40);
+			}
 		
 		}
 

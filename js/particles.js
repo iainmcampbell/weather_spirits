@@ -47,7 +47,9 @@ var swarm = {
 
 	array : [],
 	len : 0,
-	added : false, // so we don't add multiple spirits
+	added : false,
+	tailcolor: undefined,
+	rain: 0, // so we don't add multiple spirits
 
 	// ********************************************************
 	initSwarm : function(){
@@ -60,6 +62,18 @@ var swarm = {
 
 		var h = paper.view.size.height;
 		var w = paper.view.size.width;
+
+		// IMGarray=data[title].gallery;
+		// lala=api.currentLevel;
+		// fafa=api.data[lala];
+
+		// var lala=1;
+		// console.log();
+
+		// if(api.data.toronto[].rain==1){
+		// 	console.log(now);
+		// }
+		
 
 		for (var i = 0; i < howmany; i++) {
 
@@ -79,12 +93,12 @@ var swarm = {
 	
 			// calculate other parameters			
 			var speed    = util.rand(2,6); // random speed
-			var startPos = new Point(w*0.3, h*0.7); // TODO: align this to the ground
+			var startPos = new Point(ground.groundpath.segments[5].point.x, ground.groundpath.segments[5].point.y); // TODO: align this to the ground
 
 			// color!
-			var color = new Color(1, util.rand(0,0.5), 0);
+			var color = new Color(1, util.rand(0,0.5), swarm.rain);
 
-			console.log('new spirit: [%i,%i] %f',x,y,speed);
+			// console.log('new spirit: [%i,%i] %f',x,y,speed);
 
 			this.array.push( new Spirit(startPos, offset, speed, color) );
 		};
@@ -105,12 +119,22 @@ var swarm = {
 	updateSwarm : function(base_position, distance){
 
 		// add new units to swarm at an interval
-		if( Math.floor(distance % 20) == 19 ) {
+		// if( Math.floor(distance % 20) == 19 ) {
+		// 	if(swarm.added == false && swarm.array.length < 52) {
+		// 		swarm.added = true;
+		// 		swarm.add(1);	
+		// 	}
+		// } else {
+		// 	swarm.added = false;
+		// }
+
+		//add new units once spawner position moves past runner
+		if(kite.runner.position.x>=ground.masterspawner.position.x){
 			if(swarm.added == false && swarm.array.length < 52) {
 				swarm.added = true;
 				swarm.add(1);	
 			}
-		} else {
+		} else{
 			swarm.added = false;
 		}
 
@@ -151,6 +175,12 @@ var swarm = {
 
 
 		};
+
+		
+		//updates rain variable to current days data
+		swarm.rain=api.data.toronto[swarm.len].rain;
+
+		// console.log(api.data.toronto[0].rain);
 
 	}
 
@@ -228,7 +258,7 @@ var kite = {
 		})
 
 		kite.runner = new Path.Circle({
-			center : [w*(7/8), h],
+			center : [ground.groundpath.segments[5].point.x, ground.groundpath.segments[5].point.y],
 			radius : 5,
 			style : {
 				fillColor: 'grey'
@@ -275,6 +305,9 @@ var kite = {
 	},
 
 	updatePosition : function(oldPos){
+		// ground.groundpath.segments[5].point.x, ground.groundpath.segments[5].point.y
+		//RUNNER POSITION
+		kite.runner.position.y=  ground.groundpath.segments[5].point.y;
 
 		var mouse = new Point(control.currentpos.x, control.currentpos.y)
 
