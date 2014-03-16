@@ -1,4 +1,3 @@
-
 /**************************************************************************
 	
 	  _____                             
@@ -73,6 +72,8 @@ var swarm = {
 		// if(api.data.toronto[].rain==1){
 		// 	console.log(now);
 		// }
+
+		swarm.rain = 0;
 		
 
 		for (var i = 0; i < howmany; i++) {
@@ -178,7 +179,8 @@ var swarm = {
 
 		
 		//updates rain variable to current days data
-		swarm.rain=api.data.toronto[swarm.len].rain;
+		// swarm.rain=api.data.toronto[swarm.len].rain;
+
 
 		// console.log(api.data.toronto[0].rain);
 

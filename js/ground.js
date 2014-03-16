@@ -12,6 +12,8 @@ var ground = {
 	masterspawner: {},
 	spawnclones: {},
 	finish: undefined,
+	boat:{},
+	boatneutral: undefined,
 
 	spawnX: 0,
 	spawnY: 0,
@@ -28,7 +30,7 @@ var ground = {
 	direction: undefined,
 
 	bgheight: 0,
-	bgOldheight: 100,
+	bgOldheight: 200,
 
 
 
@@ -50,9 +52,9 @@ var ground = {
 				ground.current -= 4;
 			break;
 		};
-		$('div.bg1').css("backgroundPosition", (ground.direction == 'h') ? ground.current+"px 0" : "0 " + ground.current+"px");
+		// $('div.bg1').css("backgroundPosition", (ground.direction == 'h') ? ground.current+"px 0" : "0 " + ground.current+"px");
 
-		$('div.bg2').css("backgroundPosition", (ground.direction == 'h') ? (ground.current*2)+"px 0" : "0 " + ground.current+"px");
+		// $('div.bg2').css("backgroundPosition", (ground.direction == 'h') ? (ground.current*2)+"px 0" : "0 " + ground.current+"px");
 			
 		
 	},
@@ -91,29 +93,10 @@ var ground = {
 						'backgroundSize': '100% auto'
 					});
 				}	
-			// $('div.bg1,div.bg2').css({
-			// 	'backgroundSize': '100% auto'
-			// });
 		}
 	},
 
 	init : function(){
-
-
-		// speed in milliseconds
-		ground.scrollSpeed = 50;
-		
-		// set the default position
-		ground.current = 0;
-
-		// set the direction
-		ground.direction = 'h';
-
-
-		//Calls the scrolling function repeatedly
-		setInterval("ground.bgscroll()", ground.scrollSpeed);	
-
-
 
 		var windowwidth= $(window).width();
 	
@@ -125,10 +108,6 @@ var ground = {
 	
 		};
 
-		// function randonum(){
-		// 	return Math.floor((Math.random()*10));
-		// };
-	
 		dividewidth();
 
 		// ground.height= randonum() * 5 + 50;
@@ -192,6 +171,12 @@ var ground = {
 			fillColor: 'black'
 		});
 
+		ground.boat= new Path.Rectangle({
+			point: [ground.groundpath.segments[5].point.x, ground.groundpath.segments[5].point.y],
+			size: [100, 100],
+			fillColor: 'black'
+		});
+		ground.boatneutral=ground.groundpath.segments[5].point.y;
 
 	},
 
@@ -208,8 +193,8 @@ var ground = {
 		
 		} else {
 		
-				if(control.speed <= 0) {
-					control.speed = 0;
+				if(control.speed <= 1) {
+					control.speed = 1;
 					return;
 				} else {
 					control.speed -= control.spdinc;
@@ -219,12 +204,13 @@ var ground = {
 
 	update : function(){
 
-
-		ground.raise();
-
-
+		// ground.raise();
 
 		ground.spawnY=ground.groundpath.segments[2].point.y;
+		ground.boat.position.y=ground.groundpath.segments[5].point.y;
+
+		ground.boat.rotate((ground.boatneutral-ground.groundpath.segments[5].point.y)/100);
+
 
 
 		if(ground.spawnX<=ground.finish){
@@ -240,25 +226,20 @@ var ground = {
 		ground.masterspawner.position=newpos;
 
 		if(control.accelerating===true){
-				control.spawnqeues= Math.round(control.distance/10);
-				
-			}
+				control.spawnqeues= Math.round(control.distance/10);		
+		}
 		
-
 		ground.accelerate();
-		
+
+		// var xxx= bob.Perlin().noise(util.rand(),util.rand(),util.rand());
 		
 		for (var i = 0; i <= ground.amount+1; i++) {
 		
 			var segment = ground.groundpath.segments[i];
-			// var sinus = Math.sin(control.distance + i) * (control.speed/10);
-			var sinus = Math.sin(control.distance + i);
-			control.distance += control.speed * 0.01;
-			// ground.height= util.rand(25,35);
-			segment.point.y = sinus * ground.height[i] + ground.groundlevel;
-			if (segment.point.y < ground.groundlevel+.5 && segment.point.y < ground.groundlevel-.5){
-				ground.height[i]=util.rand(5,40);
-			}
+			var sinus = Math.sin(control.distance + i) * (control.speed);
+
+			control.distance += control.speed * 0.0025;
+			segment.point.y = sinus * ground.height[0] + ground.groundlevel  ;
 		
 		}
 

@@ -381,6 +381,8 @@
 
 
 	$(document).ready(function(){
+		// var xxx= perlin2(.5, 1);
+		// 		console.log(xxx);
 
 
 		// preloader.init(); // if we write a preloader
